@@ -1,0 +1,6 @@
+@Wechat.Shell_HostAddress = http://localhost:5099
+
+# GET {{Wechat.Shell_HostAddress}}/gewechatcallback/
+# Accept: application/json
+
+###
