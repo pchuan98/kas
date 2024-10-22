@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using Newtonsoft.Json;
+using Serilog.Debugging;
 
 namespace Gewechat;
 
@@ -76,6 +78,9 @@ public partial class WeChat
 
         var response = await BaseClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync();
+
+        var result = await response.Content.ReadAsStringAsync();
+        Serilog.Log.Verbose("Result: {result}", JsonConvert.SerializeObject(result, Formatting.Indented));
+        return result;
     }
 }
