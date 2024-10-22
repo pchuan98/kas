@@ -1,124 +1,241 @@
-﻿using Newtonsoft.Json.Linq;
-using Utils = Gewechat.Utils;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using QRCoder;
+using Serilog.Debugging;
 
 namespace Gewechat.Api;
+
+public class BaseResponseApi
+{
+    [JsonProperty("ret")]
+    public int ReturnCode { get; set; }
+
+    [JsonProperty("msg")]
+    public string? Message { get; set; }
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+    }
+}
+
+public class LoginToken : BaseResponseApi
+{
+    [JsonProperty("data")]
+    public string? Data { get; set; }
+}
+
+public class LoginQr : BaseResponseApi
+{
+    [JsonProperty("data")]
+
+    public QrObject? Data { get; set; }
+
+    public class QrObject
+    {
+        [JsonProperty("appId")]
+        public string? Id { get; set; }
+
+        [JsonProperty("qrData")]
+        public string? Qr { get; set; }
+
+        [JsonProperty("qrImgBase64")]
+        public string? Image { get; set; }
+
+        [JsonProperty("uuid")]
+        public string? Uuid { get; set; }
+    }
+}
+
+public class LoginCheck : BaseResponseApi
+{
+    [JsonProperty("data")]
+    public LoginCheckData? Data { get; set; }
+
+    public class LoginCheckData
+    {
+        [JsonProperty("uuid")]
+        public string? Uuid { get; set; }
+
+        [JsonProperty("headImgUrl")]
+        public string? HeadIconUrl { get; set; }
+
+        [JsonProperty("nickName")]
+        public string? NickName { get; set; }
+
+        [JsonProperty("expiredTime")]
+        public int ExpiredTime { get; set; }
+
+        [JsonProperty("status")]
+        public int Status { get; set; }
+
+        [JsonProperty("loginInfo")]
+        public LoginInfo? Info { get; set; }
+    }
+
+    public class LoginInfo
+    {
+        [JsonProperty("uin")]
+        public long Uin { get; set; }
+
+        [JsonProperty("wxid")]
+        public string? Wxid { get; set; }
+
+        [JsonProperty("nickName")]
+        public string? NickName { get; set; }
+
+        [JsonProperty("mobile")]
+        public string? Mobile { get; set; }
+
+        [JsonProperty("alias")]
+        public string? Alias { get; set; }
+    }
+}
 
 
 /// <summary>
 /// 登录模块
 /// </summary>
-public static class Login
+public class Login
 {
     /// <summary>
-    /// 获取tokenId，将tokenId配置到Utils类中的token属性
+    /// 
     /// </summary>
+    private const string TokenRoute = "/tools/getTokenId";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private const string QrRoute = "/login/getLoginQrCode";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private const string CheckRoute = "/login/checkLogin";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public LoginToken? Token { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public LoginQr? Qr { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public LoginCheck? Check { get; private set; }
+
+    /// <summary>
+    /// 返回登录结果
+    /// </summary>
+    /// <param name="appid"></param>
     /// <returns></returns>
-    public static async Task<JObject> GetToken()
+    /// <exception cref="Exception"></exception>
+    public async Task<string?> LoginWithQr(string? appid = null)
     {
-        return await Utils.PostJsonAsync("/tools/getTokenId", new JObject());
+        var tokenResponse = await Utils.PostRequestAsync(TokenRoute);
+        var token = JsonConvert.DeserializeObject<LoginToken>(tokenResponse);
+
+        if (token is null || token.ReturnCode != 200)
+            throw new Exception("Get Token Error.");
+
+        Token = token;
+
+        Serilog.Log.Information("Login token is {token}", token.Data);
+
+        var headers = new Dictionary<string, string>
+        {
+            {"X-GEWE-TOKEN",$"{token.Data}"},
+        };
+        var body = new JObject
+        {
+            ["appId"] = appid ?? "",
+        };
+
+        Serilog.Log.Verbose($"Login Headers:\n{JsonConvert.SerializeObject(headers, Formatting.Indented)}");
+        Serilog.Log.Verbose($"Login Body:\n{JsonConvert.SerializeObject(body, Formatting.Indented)}");
+
+        var qrResponse = await Utils.PostRequestAsync(QrRoute, headers, body.ToString());
+        var qr = JsonConvert.DeserializeObject<LoginQr>(qrResponse);
+
+        Qr = qr;
+
+        Serilog.Log.Information("Login Qr appid is {id}", qr?.Data?.Id);
+
+        var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(qr?.Data?.Qr ?? "", QRCodeGenerator.ECCLevel.M);
+        var qrCode = new AsciiQRCode(qrCodeData);
+        var qrCodeAsAsciiArt = qrCode.GetGraphic(1);
+
+        return qrCodeAsAsciiArt;
     }
 
-    ///// <summary>
-    ///// 设置微信消息的回调地址
-    ///// </summary>
-    ///// <param name="token"></param>
-    ///// <param name="callbackUrl"></param>
-    ///// <returns></returns>
-    //public static JObject SetCallback(string token, string callbackUrl)
-    //{
-    //    var param = new JObject
-    //    {
-    //        ["token"] = token,
-    //        ["callbackUrl"] = callbackUrl
-    //    };
-    //    return Utils.PostJSON("/tools/setCallback", param);
-    //}
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="code"></param>
+    /// <exception cref="Exception"></exception>
+    private async Task<bool> LiveCheck(string? code = null)
+    {
+        if (Token is null || string.IsNullOrWhiteSpace(Token.Data))
+            throw new Exception("Token not exists.");
 
-    ///// <summary>
-    ///// 获取登录二维码
-    ///// </summary>
-    ///// <param name="appId">设备id，首次登录传空，后续登录传返回的appid</param>
-    ///// <returns></returns>
-    //public static JObject GetQr(string appId)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId
-    //    };
-    //    return Utils.PostJSON("/login/getLoginQrCode", param);
-    //}
+        if (Qr?.Data is null || string.IsNullOrWhiteSpace(Qr.Data.Id))
+            throw new Exception("Login id not exists.");
 
-    ///// <summary>
-    ///// 确认登陆
-    ///// </summary>
-    ///// <param name="appId"></param>
-    ///// <param name="uuid">取码返回的uuid</param>
-    ///// <param name="captchCode">登录验证码（跨省登录会出现此提示，使用同省代理ip能避免此问题，也能使账号更加稳定）</param>
-    ///// <returns></returns>
-    //public static JObject CheckQr(string appId, string uuid, string captchCode)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId,
-    //        ["uuid"] = uuid,
-    //        ["captchCode"] = captchCode
-    //    };
-    //    return Utils.PostJSON("/login/checkLogin", param);
-    //}
+        var headers = new Dictionary<string, string>
+        {
+            {"X-GEWE-TOKEN",$"{Token.Data}"},
+        };
+        var body = new JObject
+        {
+            ["appId"] = Qr.Data.Id,
+            ["uuid"] = Qr.Data.Uuid,
+        };
+        if (!string.IsNullOrWhiteSpace(code))
+            body["captchCode"] = code;
 
-    ///// <summary>
-    ///// 退出微信
-    ///// </summary>
-    ///// <param name="appId"></param>
-    ///// <returns></returns>
-    //public static JObject LogOut(string appId)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId
-    //    };
-    //    return Utils.PostJSON("/login/logout", param);
-    //}
+        Serilog.Log.Verbose($"Login Headers:\n{JsonConvert.SerializeObject(headers, Formatting.Indented)}");
+        Serilog.Log.Verbose($"Login Body:\n{JsonConvert.SerializeObject(body, Formatting.Indented)}");
 
-    ///// <summary>
-    ///// 弹框登录
-    ///// </summary>
-    ///// <param name="appId"></param>
-    ///// <returns></returns>
-    //public static JObject DialogLogin(string appId)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId
-    //    };
-    //    return Utils.PostJSON("/login/dialogLogin", param);
-    //}
+        var checkResponse = await Utils.PostRequestAsync(CheckRoute, headers, body.ToString());
+        var check = JsonConvert.DeserializeObject<LoginCheck>(checkResponse);
 
-    ///// <summary>
-    ///// 检查是否在线
-    ///// </summary>
-    ///// <param name="appId"></param>
-    ///// <returns></returns>
-    //public static JObject CheckOnline(string appId)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId
-    //    };
-    //    return Utils.PostJSON("/login/checkOnline", param);
-    //}
+        Check = check;
 
-    ///// <summary>
-    ///// 退出
-    ///// </summary>
-    ///// <param name="appId"></param>
-    ///// <returns></returns>
-    //public static JObject Logout(string appId)
-    //{
-    //    JObject param = new JObject
-    //    {
-    //        ["appId"] = appId
-    //    };
-    //    return Utils.PostJSON("/login/logout", param);
-    //}
+        return check?.Data?.Info?.Wxid != null;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public async Task AutoLiveCheck()
+    {
+        var startTime = DateTime.Now;
+        var code = "";
+
+        do
+        {   
+            if (Check is not null) await Task.Delay(5000);                     // 5s触发一次
+
+            if (File.Exists("ValidCode"))
+                code = await File.ReadAllTextAsync("ValidCode");
+
+            code = code.Replace("\r", "").Replace("\n", "");
+
+            if (DateTime.Now - startTime <= TimeSpan.FromMinutes(3)) continue;
+
+            Serilog.Log.Warning("Login timeout");
+            break;
+
+        } while (!await LiveCheck(code));
+
+        if (Check?.Data?.Info?.Wxid is null) return;
+
+        Serilog.Log.Information("Login wxid is {wxid}", Check.Data.Info.Wxid);
+    }
 }
