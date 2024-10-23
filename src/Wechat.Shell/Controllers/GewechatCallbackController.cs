@@ -1,7 +1,6 @@
 ﻿using KasTools.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 using Wechat.Shell.Commands;
 
 namespace Wechat.Shell.Controllers
@@ -10,7 +9,17 @@ namespace Wechat.Shell.Controllers
     [ApiController]
     public class GewechatCallbackController : ControllerBase
     {
-        public static HttpClient WebClient = new HttpClient();
+        public CommandManager Manager = new();
+
+        public GewechatCallbackController()
+        {
+            Task.Run(async () =>
+            {
+                Thread.Sleep(10000);
+
+                await Manager.StartTimer();
+            });
+        }
 
         [HttpGet]
         public string SimpleGet()
@@ -32,17 +41,9 @@ namespace Wechat.Shell.Controllers
 
             Serilog.Log.Verbose("{wxid} : {msg}", wxid, msg);
 
-            //if (msg.Contains("[旺柴]")  ) await WeChatGlobal.Send(wxid, "[旺柴]");
-
             if (string.IsNullOrEmpty(wxid) || string.IsNullOrEmpty(msg)) return;
-            if (!msg.Contains("/price")) return;
 
-            IInteractiveCommand priceCommand = new PriceCommand()
-            {
-                Args = msg,
-                Wxid = wxid
-            };
-            priceCommand.Executor?.Invoke();
+            Manager.DumpMessage(WeChatGlobal.ParseCallback(json));
         }
     }
 }

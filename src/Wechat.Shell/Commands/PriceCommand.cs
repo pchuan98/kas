@@ -25,12 +25,12 @@ public class PriceCommand : IInteractiveCommand
                 var args = Args.Trim();
 
                 if (string.IsNullOrEmpty(args))
-                    await WeChatGlobal.Send(Wxid, "Price Command Args Error.");
+                    await WeChatGlobal.Send(Wxid, "/price Command Args Error.");
 
                 var match = ArgsPattern.Match(Args);
                 if (!match.Success)
                 {
-                    await WeChatGlobal.Send(Wxid, "Price Command Args Error.");
+                    await WeChatGlobal.Send(Wxid, "/price Command Args Error.");
                     return;
                 }
 
@@ -46,7 +46,7 @@ public class PriceCommand : IInteractiveCommand
                     .ToHashSet();
 
                 if (names.Count == 0)
-                    await WeChatGlobal.Send(Wxid, "Price Command Args Is 0.");
+                    await WeChatGlobal.Send(Wxid, "/price Command Args Is 0.");
 
                 var tokens = await TokenUtil.QueryAll();
 
@@ -58,7 +58,6 @@ public class PriceCommand : IInteractiveCommand
 
                     //msg += $"{name.Trim(),-10}:  {token?.Price?.FloorPrice:F8} KAS\n";
                     msg += $"{name.Trim(),10}:  {token?.Price?.FloorPrice:F8} KAS\n";
-
                 }
 
                 await WeChatGlobal.Send(Wxid, msg);

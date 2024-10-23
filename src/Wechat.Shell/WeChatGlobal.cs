@@ -1,4 +1,5 @@
 ﻿using Gewechat;
+using Wechat.Shell.Models;
 
 namespace Wechat.Shell;
 
@@ -26,5 +27,10 @@ public static class WeChatGlobal
 
         if (!rect)
             Serilog.Log.Error("Send message error. {wxid} -> {msg}", wxid, content);
+    }
+
+    public static ReceiveMessageModel ParseCallback(string content)
+    {
+        throw new Exception();
     }
 }
