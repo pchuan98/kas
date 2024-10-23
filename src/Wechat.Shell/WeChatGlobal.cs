@@ -19,4 +19,12 @@ public static class WeChatGlobal
         Console.WriteLine(WechatObject.IsOnline);
         Console.WriteLine(await WechatObject.SetCallbackUrl("http://100.64.4.199:5099/api/GewechatCallback"));
     }
+
+    public static async Task Send(string wxid, string content)
+    {
+        var rect = await WechatObject.SendFriendStringMsg(wxid, content);
+
+        if (!rect)
+            Serilog.Log.Error("Send message error. {wxid} -> {msg}", wxid, content);
+    }
 }

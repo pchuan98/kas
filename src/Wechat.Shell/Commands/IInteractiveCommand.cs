@@ -13,7 +13,7 @@ public interface IInteractiveCommand : ICommandBase
     public string Args { get; set; }
 
     /// <summary>
-    /// 
+    /// 任务执行人
     /// </summary>
-    public Action CommandAction { get; }
+    public Action Executor { get; }
 }

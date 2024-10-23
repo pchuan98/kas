@@ -1,9 +1,8 @@
 ﻿using KasTools.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Xml.Linq;
-using Kas.Test.Console;
 using System.Text.RegularExpressions;
+using Wechat.Shell.Commands;
 
 namespace Wechat.Shell.Controllers
 {
@@ -29,31 +28,21 @@ namespace Wechat.Shell.Controllers
             if (callback?.Data?.MsgType != 1) return;
 
             var wxid = callback?.Data?.FromUserName?.WxId;
-            var command = callback?.Data?.Content?.MessageContent;
+            var msg = callback?.Data?.Content?.MessageContent;
 
-            if (string.IsNullOrEmpty(wxid) || string.IsNullOrEmpty(command)) return;
-            if (!command.Contains("/price")) return;
+            Serilog.Log.Verbose("{wxid} : {msg}", wxid, msg);
 
-            var pattern = @"^wx.*\n(.*)";
-            var match = Regex.Match(command, pattern);
-            if (match.Success)
-                command = match.Groups[1].Value;
-            
+            //if (msg.Contains("[旺柴]")  ) await WeChatGlobal.Send(wxid, "[旺柴]");
 
-            var coinName = command.Replace("/price", "").Trim().ToUpper();
-            var url = $"https://api-v2-do.kas.fyi/token/krc20/{coinName}/info?includeCharts=true";
-            var coinResponse = await WebClient.GetStringAsync(url);
+            if (string.IsNullOrEmpty(wxid) || string.IsNullOrEmpty(msg)) return;
+            if (!msg.Contains("/price")) return;
 
-            var info = JsonConvert.DeserializeObject<KasInfo>(coinResponse)!;
-
-            var price = $"{info.Price?.FloorPrice:F8}";
-            var usd = $"{info.Price?.MarketcapInUsd:F8}";
-
-            var msg = $"{coinName} {DateTime.Now:MM-dd HH:mm:ss}\n\n" +
-                      $"Float Price: {price}\n";
-
-            var rec = await WeChatGlobal.WechatObject!.SendFriendStringMsg(wxid, msg);
-            Console.WriteLine(rec);
+            IInteractiveCommand priceCommand = new PriceCommand()
+            {
+                Args = msg,
+                Wxid = wxid
+            };
+            priceCommand.Executor?.Invoke();
         }
     }
 }

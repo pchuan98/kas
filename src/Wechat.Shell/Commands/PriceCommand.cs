@@ -18,7 +18,7 @@ public class PriceCommand : IInteractiveCommand
 
     public PriceCommand()
     {
-        CommandAction = () =>
+        Executor = () =>
         {
             Task.Run(async () =>
             {
@@ -73,8 +73,7 @@ public class PriceCommand : IInteractiveCommand
     public string Args { get; set; } = "";
 
     /// <inheritdoc />
-    public Action CommandAction { get; }
-
+    public Action Executor { get; }
 
     /// <inheritdoc />
     public string Wxid { get; set; } = "";
