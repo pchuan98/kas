@@ -64,7 +64,7 @@ public class AutoBroadcastCommand : IInteractiveCommand
                 return;
             }
 
-            if (match.Groups[1].Value.ToLower().Contains("\add"))
+            if (match.Groups[1].Value.ToLower().Contains("/add"))
                 Key = "/add";
             else if (match.Groups[1].Value.ToLower().Contains("\remove"))
                 Key = "/remove";
@@ -88,13 +88,19 @@ public class AutoBroadcastCommand : IInteractiveCommand
                 ?.Select(item => item.Ticker?.ToLower());
 
             var valid = splitArgs
-                .Where(item => names?.Contains(item) is true);
+                .Where(item => item.ToUpper().Contains(item));
 
             var array = valid as string[] ?? valid.ToArray();
 
             if (Tickers.Count + array.Length > 10)
             {
                 await WeChatGlobal.Send(Wxid, "The automatic brodcast queue is full.");
+                return;
+            }
+
+            if (array.Length == 0)
+            {
+                await WeChatGlobal.Send(Wxid, "The args not in tricker list.");
                 return;
             }
 

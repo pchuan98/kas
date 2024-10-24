@@ -1,7 +1,6 @@
-﻿using KasTools.Models;
+﻿using Gewechat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Wechat.Shell.Commands;
 
 namespace Wechat.Shell.Controllers
 {
@@ -9,18 +8,6 @@ namespace Wechat.Shell.Controllers
     [ApiController]
     public class GewechatCallbackController : ControllerBase
     {
-        public CommandManager Manager = new();
-
-        public GewechatCallbackController()
-        {
-            Task.Run(async () =>
-            {
-                Thread.Sleep(10000);
-
-                await Manager.StartTimer();
-            });
-        }
-
         [HttpGet]
         public string SimpleGet()
         {
@@ -43,7 +30,7 @@ namespace Wechat.Shell.Controllers
 
             if (string.IsNullOrEmpty(wxid) || string.IsNullOrEmpty(msg)) return;
 
-            Manager.DumpMessage(WeChatGlobal.ParseCallback(json));
+            CommandManager.Instance.DumpMessage(WeChatGlobal.ParseCallback(json));
         }
     }
 }

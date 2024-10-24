@@ -13,7 +13,7 @@ namespace Wechat.Shell;
 public class CommandManager
 {
     private static readonly string[] WhiteListGroup = [
-        ""
+        "53473027910@chatroom"
     ];
 
     private static readonly Dictionary<string, IInteractiveCommand> Commands = new()
@@ -28,7 +28,7 @@ public class CommandManager
     private static async void MiniteTimerCallback(object? state)
     {
         // 整点运行
-        if (DateTime.Now.Minute == 0)
+        if (AutoBroadcastCommand.Tickers.Count != 0)
         {
             var msg = $"[TIME] {DateTime.Now:MM-dd HH:mm:ss}\n\n";
             var tokens = await TokenUtil.QueryAll();
@@ -39,7 +39,7 @@ public class CommandManager
                 if (token is null) continue;
 
                 //msg += $"{name.Trim(),-10}:  {token?.Price?.FloorPrice:F8} KAS\n";
-                msg += $"{name.Trim(),10}:  {token?.Price?.FloorPrice:F8} KAS\n";
+                msg += $"{name.Trim(),-10}:  {token?.Price?.FloorPrice:F8} KAS\n";
             }
 
             foreach (var group in WhiteListGroup)
@@ -61,7 +61,7 @@ public class CommandManager
                  select Commands[commandName])
         {
             command.Args = message.Content;
-            command.Wxid = message.User!;
+            command.Wxid = message.Group!;
             command.Executor?.Invoke();
 
             break;
@@ -83,4 +83,6 @@ public class CommandManager
         foreach (var group in WhiteListGroup)
             await WeChatGlobal.Send(group, "[庆祝] The hourly time chime function has been turned on! [庆祝]");
     }
+
+    public static readonly CommandManager Instance = new();
 }

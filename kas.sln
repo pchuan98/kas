@@ -16,9 +16,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wechat.Shell", "src\Wechat.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KasTools", "src\KasTools\KasTools.csproj", "{443C1CC4-C740-48F6-B314-AEBE05EF18FC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kas.Test.Console", "test\Kas.Test.Console\Kas.Test.Console.csproj", "{06EFEE59-5871-4063-B693-A4B7CFBC0CB4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2F4924C2-9C78-4495-832F-1D904D4F9D58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.Test.Console", "test\Demo.Test.Console\Demo.Test.Console.csproj", "{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChat.Api.Shell", "src\WeChat.Api.Shell\WeChat.Api.Shell.csproj", "{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kas.Api.Shell", "src\Kas.Api.Shell\Kas.Api.Shell.csproj", "{D8156DD0-93F1-4601-A27B-D83288642309}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{E5C73D0E-EBF9-4E7E-B0EA-0C40E97ED64A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,16 +44,26 @@ Global
 		{443C1CC4-C740-48F6-B314-AEBE05EF18FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{443C1CC4-C740-48F6-B314-AEBE05EF18FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{443C1CC4-C740-48F6-B314-AEBE05EF18FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{06EFEE59-5871-4063-B693-A4B7CFBC0CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{06EFEE59-5871-4063-B693-A4B7CFBC0CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{06EFEE59-5871-4063-B693-A4B7CFBC0CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{06EFEE59-5871-4063-B693-A4B7CFBC0CB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8156DD0-93F1-4601-A27B-D83288642309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8156DD0-93F1-4601-A27B-D83288642309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8156DD0-93F1-4601-A27B-D83288642309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8156DD0-93F1-4601-A27B-D83288642309}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{06EFEE59-5871-4063-B693-A4B7CFBC0CB4} = {2F4924C2-9C78-4495-832F-1D904D4F9D58}
+		{0F3C65EA-4339-436A-A56B-77BEC42678A1} = {E5C73D0E-EBF9-4E7E-B0EA-0C40E97ED64A}
+		{443C1CC4-C740-48F6-B314-AEBE05EF18FC} = {E5C73D0E-EBF9-4E7E-B0EA-0C40E97ED64A}
+		{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C} = {2F4924C2-9C78-4495-832F-1D904D4F9D58}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9AD1C617-DD3B-4859-889D-950E7509F167}

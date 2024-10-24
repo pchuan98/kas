@@ -8,7 +8,7 @@ public class ReceiveMessageModel
     /// <summary>
     /// 是否为群组id
     /// </summary>
-    public bool IsGroup { get; set; }
+    public bool IsGroup { get; set; } = false;
 
     /// <summary>
     /// 群组的id

@@ -12,9 +12,14 @@ Task.Run(async () =>
         .WriteTo.Console()
         .CreateLogger();
 
+    //await WeChatGlobal.WechatObject.RequireReLogin();
+
     await Task.Delay(2000);
 
     await WeChatGlobal.SetCallbackUrl();
+
+    await Task.Delay(2000);
+    await CommandManager.Instance.StartTimer();
 });
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,3 +31,4 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+

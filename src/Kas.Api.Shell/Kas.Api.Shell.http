@@ -1,0 +1,6 @@
+@Kas.Api.Shell_HostAddress = http://localhost:5291
+
+GET {{Kas.Api.Shell_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

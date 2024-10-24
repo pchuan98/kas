@@ -1,0 +1,6 @@
+@WeChat.Api.Shell_HostAddress = http://localhost:5099
+
+GET {{WeChat.Api.Shell_HostAddress}}/login/info
+Accept: application/json
+
+###
