@@ -12,7 +12,7 @@ public partial class WeChat
     /// 通用的基础client
     /// </summary>
     internal static readonly HttpClient BaseClient
-        = new HttpClient(new HttpClientHandler()
+        = new(new HttpClientHandler()
         {
             ServerCertificateCustomValidationCallback = (_, _, _, _) => true
         })

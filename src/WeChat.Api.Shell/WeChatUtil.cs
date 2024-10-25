@@ -16,7 +16,8 @@ public static class WeChatUtil
         {
             if (_wechat is not null) return _wechat;
 
-            if (ResetWeChat() && _wechat is not null) return _wechat;
+            if (ResetWeChat().Result 
+                && _wechat is not null) return _wechat;
 
             throw new Exception();
         }
@@ -27,17 +28,17 @@ public static class WeChatUtil
     /// </summary>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static bool ResetWeChat()
+    public static async Task<bool> ResetWeChat()
     {
         if (!File.Exists(ValueBox.WE_CHAT_CONFIG_PATH))
         {
             Serilog.Log.Warning($"The File {ValueBox.WE_CHAT_CONFIG_PATH} not create.");
 
             var info = JsonConvert.SerializeObject(new WeChatInfo(), Formatting.Indented);
-            File.WriteAllText(ValueBox.WE_CHAT_CONFIG_PATH, info);
+            await File.WriteAllTextAsync(ValueBox.WE_CHAT_CONFIG_PATH, info);
         }
 
-        var text = File.ReadAllText(ValueBox.WE_CHAT_CONFIG_PATH);
+        var text = await File.ReadAllTextAsync(ValueBox.WE_CHAT_CONFIG_PATH);
         var obj = JsonConvert.DeserializeObject<WeChatInfo>(text);
 
         if (obj is null)
@@ -48,13 +49,16 @@ public static class WeChatUtil
 
         if (obj.Url is null)
         {
-            Serilog.Log.Error("Must set WeChat Url Path@!");
-            throw new Exception();
+            Serilog.Log.Error("Must set WeChat Url Path!");
+            Console.Write("Please input the WeCaht API URL :");
+
+            obj.Url = Console.ReadLine();
         }
 
         Serilog.Log.Information("WeChat Config : {config}", obj);
-        _wechat = new Gewechat.WeChat(obj!.Url, obj.Token, obj.AppId, obj.Uuid);
+        _wechat = new Gewechat.WeChat(obj.Url!, obj.Token, obj.AppId, obj.Uuid);
 
+        await Save();
         return true;
     }
 
@@ -69,6 +73,8 @@ public static class WeChatUtil
         await Instance.RequireToken();
         Console.WriteLine(await Instance.RequireLoginQr());
         await Instance.RequireLogin();
+
+        await Save();
     }
 
     /// <summary>

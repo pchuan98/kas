@@ -18,13 +18,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KasTools", "src\KasTools\Ka
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2F4924C2-9C78-4495-832F-1D904D4F9D58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.Test.Console", "test\Demo.Test.Console\Demo.Test.Console.csproj", "{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Test.Console", "test\Demo.Test.Console\Demo.Test.Console.csproj", "{697CF6E8-3EC7-4904-89CC-A08B6CD0A70C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChat.Api.Shell", "src\WeChat.Api.Shell\WeChat.Api.Shell.csproj", "{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeChat.Api.Shell", "src\WeChat.Api.Shell\WeChat.Api.Shell.csproj", "{24C8E9E9-9EBE-471F-BCEE-EF4C7B6B29D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kas.Api.Shell", "src\Kas.Api.Shell\Kas.Api.Shell.csproj", "{D8156DD0-93F1-4601-A27B-D83288642309}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kas.Api.Shell", "src\Kas.Api.Shell\Kas.Api.Shell.csproj", "{D8156DD0-93F1-4601-A27B-D83288642309}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{E5C73D0E-EBF9-4E7E-B0EA-0C40E97ED64A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chuan.Core", "src\Chuan.Core\Chuan.Core.csproj", "{B347D283-5F7A-4A61-8F91-E2861BE64BDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{D8156DD0-93F1-4601-A27B-D83288642309}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8156DD0-93F1-4601-A27B-D83288642309}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8156DD0-93F1-4601-A27B-D83288642309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B347D283-5F7A-4A61-8F91-E2861BE64BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B347D283-5F7A-4A61-8F91-E2861BE64BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B347D283-5F7A-4A61-8F91-E2861BE64BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B347D283-5F7A-4A61-8F91-E2861BE64BDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

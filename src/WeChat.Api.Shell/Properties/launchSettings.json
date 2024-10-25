@@ -3,10 +3,10 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "api/login",
-      "applicationUrl": "http://localhost:9000",
+      "dotnetRunMessages": false,
+      "launchBrowser": false,
+      "launchUrl": "api/callback",
+      "applicationUrl": "http://0.0.0.0:5099",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

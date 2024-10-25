@@ -16,4 +16,9 @@ public class WeChatInfo
 
     [JsonProperty("uuid")]
     public string? Uuid { get; set; }
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+    }
 }
