@@ -45,7 +45,7 @@ public class LoginController : ControllerBase
                    </head>
                    <body>
                        <ol>
-                       <li><a href="https://www.example.com">点击跳转到Example网站</a></li>
+                       <li><a href="/qr">点击跳转到Example网站</a></li>
                        </ol>
                    </body>
                    </html>
@@ -81,17 +81,35 @@ public class LoginController : ControllerBase
     [HttpGet("qr")]
     public async Task<IActionResult> QrLogin()
     {
-        await WeChatUtil.Login();
+        await WeChatUtil.Instance.RequireToken();
 
+        Serilog.Log.Information("QR Code:\n{qr}", await WeChatUtil.Instance.RequireLogin());
+
+        await WeChatUtil.Instance.RequireLogin();
+
+        await WeChatUtil.Save();
         return Ok();
     }
 
-    [HttpGet("relogin")]
-    public IActionResult ReLogin()
+    [HttpGet("reset")]
+    public async Task<IActionResult> ResetLogin()
     {
-        return Redirect("https://www.example.com");
-
+        await WeChatUtil.ResetWeChat();
+        return Ok();
     }
 
-   
+    [HttpGet("isonline")]
+    public IActionResult CheckOnline()
+    {
+        return Ok(WeChatUtil.Instance.IsOnline);
+    }
+
+    [HttpGet("callback")]
+    public async Task<IActionResult> SetCallback()
+    {
+        var url = $"{Request.Scheme}://{Request.Host}/api/callback";
+        var result = await WeChatUtil.Instance.SetCallbackUrl(url);
+
+        return Ok(result);
+    }
 }

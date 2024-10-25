@@ -3,7 +3,7 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
+      "dotnetRunMessages": false,
       "launchBrowser": false,
       "launchUrl": "test",
       "applicationUrl": "http://0.0.0.0:5098",

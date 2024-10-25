@@ -1,8 +1,7 @@
-﻿using Chuan.Core.Models;
+﻿using Chuan.Core;
+using Chuan.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using PChuan.Core;
-using System;
-using System.Reflection;
 
 namespace Kas.Api.Shell.Controllers;
 
@@ -32,7 +31,7 @@ public record TaskCell(DateTime Last, TaskTimer Task);
 [ApiController]
 public class TimerController : ControllerBase
 {
-    internal static readonly HttpClient Client = new();
+    //internal static readonly HttpClient Client = new();
 
     /// <summary>
     /// 
@@ -82,7 +81,7 @@ public class TimerController : ControllerBase
                     TaskTimerCollection[i] = new ValueTuple<DateTime, TaskTimer>(current, task.Task);
 
                     var url = $"{BaseUrl}/{task.Task.Task}";
-                    Task.Run(async () => await Client.PostAsJsonAsync(url, back));
+                    Task.Run(async () => await ClientUtils.ClientInstance.PostAsJsonAsync(url, back));
                 }
                 catch (Exception e)
                 {
@@ -173,7 +172,6 @@ public class TimerController : ControllerBase
                     task,
                     args
                 )));
-
         }
     }
 

@@ -11,4 +11,9 @@ public static class ValueBox
     /// 将命令广播出去的基础地址
     /// </summary>
     public static string BroadcastUrl = "http://localhost:5098/api";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static string LocalUrl = "http://localhost:5099/api";
 }

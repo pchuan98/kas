@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using Chuan.Core;
 using Chuan.Core.Models;
 using Newtonsoft.Json.Linq;
 
@@ -66,7 +67,6 @@ public class CallbackController : ControllerBase
         }
         else callback.Sender = fromWxid ?? "";
 
-
         if (!CommandValidPattern.IsMatch(msg.Trim())) return;
 
         var match = MessagePattern.Match(msg.Trim());
@@ -79,7 +79,7 @@ public class CallbackController : ControllerBase
 
         callback.CommandName = match.Groups[1].Value;
         callback.Args = match.Groups[2].Success
-            ? match.Groups[2].Value.Split(new[] { ' ', ',', '，', '、' }
+            ? match.Groups[2].Value.Split([' ', ',', '，', '、']
                 , StringSplitOptions.RemoveEmptyEntries)
             : null;
 
@@ -112,7 +112,9 @@ public class CallbackController : ControllerBase
 
             var broadcastUrl = $"{baseUrl}/{callback.CommandName.ToLower()}";
 
-            await Client.PostAsJsonAsync(broadcastUrl, callback);
+            Console.WriteLine($"Send -> {DateTime.Now:T}");
+
+            await ClientUtils.ClientInstance.PostAsJsonAsync(broadcastUrl, callback);
         }
         catch (Exception e)
         {
@@ -120,13 +122,11 @@ public class CallbackController : ControllerBase
         }
     }
 
-    private static readonly HttpClient Client = new();
-
     private async Task<bool> CheckPermissionAsync(CallbackModel callback)
     {
-        var url = $"{Request.Scheme}://{Request.Host}/api/permissions/check";
+        var url = $"{ValueBox.LocalUrl}/permissions/check";
 
-        var response = await Client.PostAsJsonAsync(url, callback);
+        var response = await ClientUtils.ClientInstance.PostAsJsonAsync(url, callback);
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadAsStringAsync();

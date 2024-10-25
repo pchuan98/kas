@@ -56,6 +56,7 @@ public static class WeChatUtil
         }
 
         Serilog.Log.Information("WeChat Config : {config}", obj);
+
         _wechat = new Gewechat.WeChat(obj.Url!, obj.Token, obj.AppId, obj.Uuid);
 
         await Save();

@@ -41,21 +41,30 @@ public class PriceController : ControllerBase
         var permission = await CheckPermission(request);
         if (!permission) return;
 
-        var sender = request.IsGroup ? request.Group : request.Sender;
+        var receiver = request.Receiver;
 
-        LastArgs.TryGetValue(sender, out var last);
-        var args = (request.Args ?? last)?.ToHashSet();
+        // args有，last=args，args没有，看last有么，没有返回错误
+        LastArgs.TryGetValue(receiver, out var last);
+        var args = request.Args?.ToHashSet();
 
-        if (!LastArgs.Keys.Contains(sender))
-            LastArgs.TryAdd(sender, args?.ToArray());
-        else
-            LastArgs[sender] = args?.ToArray();
-
-        if (args is null)
+        // args x && last x
+        if ((args is null || args.Count == 0)
+            && (last is null || last.Length == 0))
         {
             await request.SendMessage("请输入正确的Ticker Name");
             return;
         }
+
+        if (args?.Count > 0) // args ok
+        {
+            // 设置last
+            if (!LastArgs.Keys.Contains(receiver))
+                LastArgs.TryAdd(receiver, args?.ToArray());
+            else
+                LastArgs[receiver] = args?.ToArray();
+        }
+        else args = last!.ToHashSet();
+        
 
         if (ValueBox.AliveKasInfo.Tokens.Data is null)
             await ValueBox.AliveKasInfo.UpdateTokens();
@@ -72,8 +81,8 @@ public class PriceController : ControllerBase
         var tokens = ValueBox.AliveKasInfo.Tokens.Data;
         var time = ValueBox.AliveKasInfo.Tokens.Time;
 
-        var msg = $"[TIME] {time:MM-dd HH:mm:ss}\n\n";
-        foreach (var name in args)
+        var msg = $"[TIME] {DateTime.Now:MM-dd HH:mm:ss}\n\n";
+        foreach (var name in args!)
         {
             var token = tokens?.FirstOrDefault(token => token.Ticker?.ToUpper().Trim() == $"{name.ToUpper().Trim()}");
             if (token is null) continue;
