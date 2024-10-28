@@ -1,15 +1,12 @@
 ﻿using System.Net.Http.Headers;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using Chuan.Core;
 using Newtonsoft.Json;
-using Serilog.Debugging;
 
 namespace Gewechat;
 
 public partial class WeChat
 {
-
     /// <summary>
     /// 
     /// </summary>

@@ -3,10 +3,10 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "dotnetRunMessages": false,
+      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "api/callback/commands",
-      "applicationUrl": "http://0.0.0.0:5099",
+      "launchUrl": "weatherforecast",
+      "applicationUrl": "http://127.0.0.1:9999",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -16,20 +16,24 @@ public static class WeChatUtil
         {
             if (_wechat is not null) return _wechat;
 
-            if (ResetWeChat().Result 
+            if (SetWeChatWithFile().Result
                 && _wechat is not null) return _wechat;
 
             throw new Exception();
         }
     }
 
+    public static void SetWeChat(Gewechat.WeChat chat)
+        => _wechat = chat;
+
     /// <summary>
     /// 重新设置 WeChat 信息
     /// </summary>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static async Task<bool> ResetWeChat()
+    public static async Task<bool> SetWeChatWithFile()
     {
+        // file not exist
         if (!File.Exists(ValueBox.WE_CHAT_CONFIG_PATH))
         {
             Serilog.Log.Warning($"The File {ValueBox.WE_CHAT_CONFIG_PATH} not create.");
@@ -41,6 +45,7 @@ public static class WeChatUtil
         var text = await File.ReadAllTextAsync(ValueBox.WE_CHAT_CONFIG_PATH);
         var obj = JsonConvert.DeserializeObject<WeChatInfo>(text);
 
+        // file content is null
         if (obj is null)
         {
             Serilog.Log.Error("WeChat config file read failed.");

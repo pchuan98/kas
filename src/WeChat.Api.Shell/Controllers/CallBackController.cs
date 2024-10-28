@@ -28,6 +28,63 @@ public class CallbackController : ControllerBase
         return $"{Request.Scheme}://{Request.Host}{Request.Path}/{Request.PathBase}";
     }
 
+    [HttpGet("commands")]
+    public IActionResult GetCommands()
+    {
+        return Ok();
+        throw new Exception();
+    }
+
+
+    [HttpPost("register")]
+    public IActionResult RegisterCommand([FromBody] object command)
+    {
+        var obj = JsonConvert.DeserializeObject<RegisterModel>(command.ToString() ?? "");
+
+        // todo valid
+        if (string.IsNullOrWhiteSpace(obj?.Name) || string.IsNullOrWhiteSpace(obj?.Url))
+            return BadRequest("Command name is required.");
+
+        Serilog.Log.Information("Register command: {name} -> {url}", obj.Name, obj.Url);
+
+        var current = ValueBox.CommandCollection.FirstOrDefault(item => item.Name.ToLower() == obj.Name.ToLower());
+        if (current is null)
+            ValueBox.CommandCollection.Add(new(obj.Name, obj.Url));
+        else
+            current.Url = obj.Url;
+        return Ok("Command registered successfully.");
+    }
+
+    [HttpPut("register")]
+    public IActionResult UpdateCommand([FromBody] (string CommandName, string CommandUrl) command)
+    {
+        var existingCommand = ValueBox.CommandCollection.FirstOrDefault(c => c.Name == command.CommandName);
+
+        if (existingCommand == default)
+        {
+            return NotFound("Command not found.");
+        }
+
+        ValueBox.CommandCollection.TryTake(out existingCommand);
+        ValueBox.CommandCollection.Add(new(command.CommandName, command.CommandUrl));
+
+        return Ok("Command updated successfully.");
+    }
+
+    [HttpDelete("register/{commandName}")]
+    public IActionResult DeleteCommand(string commandName)
+    {
+        var existingCommand = ValueBox.CommandCollection.FirstOrDefault(c => c.Name == commandName);
+
+        if (existingCommand == default)
+        {
+            return NotFound("Command not found.");
+        }
+
+        ValueBox.CommandCollection.TryTake(out existingCommand);
+        return Ok("Command deleted successfully.");
+    }
+
     [HttpPost]
     public async void WeChatCallback([FromBody] object content)
     {
@@ -79,7 +136,7 @@ public class CallbackController : ControllerBase
 
         callback.CommandName = match.Groups[1].Value;
         callback.Args = match.Groups[2].Success
-            ? match.Groups[2].Value.Split([' ', ',', '，', '、']
+            ? match.Groups[2].Value.Split(new char[] { ' ', ',', '，', '、' }  // Linux必须这样写
                 , StringSplitOptions.RemoveEmptyEntries)
             : null;
 
@@ -88,33 +145,23 @@ public class CallbackController : ControllerBase
         // 授权
         var isPermission = await CheckPermissionAsync(callback);
 
+        Serilog.Log.Information("Permission Status :\n{status}", isPermission);
+
         if (!isPermission) return;
 
         // 广播
         try
         {
-            if (callback.CommandName == "wechat")
-            {
-                if (callback.Args?.Length >= 1)
-                {
-                    callback.CommandName = callback.Args[0];
-                    callback.Args = callback.Args[1..];
-                }
-                else // todo 输出wechat所有的命令
-                {
-                    return;
-                }
-            }
+            var command = ValueBox.CommandCollection
+                .FirstOrDefault(item
+                    => item.Name.ToLower() == callback.CommandName.ToLower());
 
-            var baseUrl = callback.CommandName == "wechat"
-                ? $"{Request.Scheme}://{Request.Host}/api"
-                : ValueBox.BroadcastUrl;
+            if (command is null) return;
 
-            var broadcastUrl = $"{baseUrl}/{callback.CommandName.ToLower()}";
+            Serilog.Log.Information("Start a command: {command}", callback.ToString());
 
-            Console.WriteLine($"Send -> {DateTime.Now:T}");
+            await ClientUtils.ClientInstance.PostAsJsonAsync(command.Url, callback);
 
-            await ClientUtils.ClientInstance.PostAsJsonAsync(broadcastUrl, callback);
         }
         catch (Exception e)
         {
@@ -122,8 +169,14 @@ public class CallbackController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="callback"></param>
+    /// <returns></returns>
     private async Task<bool> CheckPermissionAsync(CallbackModel callback)
     {
+        return true;
         var url = $"{ValueBox.LocalUrl}/permissions/check";
 
         var response = await ClientUtils.ClientInstance.PostAsJsonAsync(url, callback);

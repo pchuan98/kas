@@ -27,6 +27,7 @@ public class PriceController : ControllerBase
         await Task.Delay(10);
 
         // todo 添加其他的东西
+        return true;
         return request.IsSuperAdmin();
     }
 
@@ -87,7 +88,7 @@ public class PriceController : ControllerBase
             var token = tokens?.FirstOrDefault(token => token.Ticker?.ToUpper().Trim() == $"{name.ToUpper().Trim()}");
             if (token is null) continue;
 
-            msg += $"[烟花] {name.Trim(),-12} : {token?.Price?.FloorPrice:F8} KAS\n";
+            msg += $"[烟花] {name.ToUpper().Trim(),-10} : {token?.Price?.FloorPrice:F8} KAS\n";
         }
 
         await request.SendMessage(msg);

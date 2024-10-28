@@ -82,7 +82,42 @@ partial class WeChat
         var qrCode = new AsciiQRCode(qrCodeData);
         var qrCodeAsAsciiArt = qrCode.GetGraphic(1);
 
+        Task.Run(async () =>
+        {
+            await RequireLogin();
+        });
+
         return qrCodeAsAsciiArt;
+    }
+
+    public async Task<string?> RequireLoginQrBases64()
+    {
+        var body = new JObject
+        {
+            ["appId"] = AppId ?? ""
+        };
+
+        var qrResponse = await PostJsonRequestWithHeaderAsync("/login/getLoginQrCode", body.ToString());
+        var qr = JsonConvert.DeserializeObject<LoginQr>(qrResponse);
+
+        if (qr!.ReturnCode == 500)
+        {
+            Serilog.Log.Error("Qr Get Error 500. Message is {msg}", qr.Message);
+            throw new Exception(qr.Message);
+        }
+
+        AppId = qr.Data?.Id;
+        Uuid = qr.Data?.Uuid;
+
+        Serilog.Log.Information("Login Qr appid is {id}", AppId);
+        Serilog.Log.Information("Login Qr uuid is {uuid}", Uuid);
+
+        Task.Run(async () =>
+        {
+            await RequireLogin();
+        });
+
+        return qr.Data?.Image;
     }
 
     /// <summary>

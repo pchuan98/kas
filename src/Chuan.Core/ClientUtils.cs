@@ -19,7 +19,7 @@ public static class ClientUtils
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             })
             {
-                Timeout = TimeSpan.FromSeconds(20)
+                Timeout = TimeSpan.FromSeconds(60) // todo 多次获取结果
             };
 
             _client.DefaultRequestVersion = HttpVersion.Version20;

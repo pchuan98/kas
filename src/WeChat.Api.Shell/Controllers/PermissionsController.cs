@@ -16,12 +16,12 @@ public class PermissionsController : ControllerBase
     /// <summary>
     /// 
     /// </summary>
-    public const string HAS_PERMISSION_STRING = "{\"HasPermission\":true}";
+    public const string HasPermissionString = "{\"HasPermission\":true}";
 
     /// <summary>
     /// 
     /// </summary>
-    public const string NO_PERMISSION_STRING = "{\"HasPermission\":false}";
+    public const string NoPermissionString = "{\"HasPermission\":false}";
 
     /// <summary>
     /// 
@@ -33,15 +33,15 @@ public class PermissionsController : ControllerBase
     {
         // 如果是我的账号，无脑通过
         if (request.Sender == "wxid_xwmbszzoarry21")
-            return Ok(HAS_PERMISSION_STRING);
+            return Ok(HasPermissionString);
 
-        return Ok(NO_PERMISSION_STRING);
+        return Ok(HasPermissionString);
 
         var level = await GetPermissionLevel(request);
 
         // admin权限最高，可以在任何时候广播
         if (level == PermissionLevel.Admin) 
-            return Ok(HAS_PERMISSION_STRING);
+            return Ok(HasPermissionString);
         // 判断是不是有权限的群，如果不是不再广播
         if (level == PermissionLevel.GroupAdmin)
         {
@@ -49,7 +49,7 @@ public class PermissionsController : ControllerBase
         }
 
         // 判断用户是否有权限，没有没有也不广播
-        return Ok(HAS_PERMISSION_STRING);
+        return Ok(HasPermissionString);
     }
 
     /// <summary>
