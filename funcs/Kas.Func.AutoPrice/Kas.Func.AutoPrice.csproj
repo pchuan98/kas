@@ -7,15 +7,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Serilog" Version="4.1.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+		<Folder Include="Controllers\" />
 	</ItemGroup>
 
 
 	<ItemGroup>
-		<ProjectReference Include="..\Gewechat\Gewechat.csproj" />
-		<ProjectReference Include="..\KasTools\KasTools.csproj" />
+		<PackageReference Include="Serilog" Version="4.1.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Chuan.Core\Chuan.Core.csproj" />
+		<ProjectReference Include="..\..\src\KasTools\KasTools.csproj" />
 	</ItemGroup>
 
 </Project>

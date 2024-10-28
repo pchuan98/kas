@@ -1,4 +1,5 @@
-﻿using KasTools.Models;
+﻿using Chuan.Core;
+using KasTools.Models;
 using Newtonsoft.Json;
 
 namespace KasTools.Utils;
@@ -7,7 +8,7 @@ public static class TrendingUtils
 {
     public static async Task<Trending?> QueryAll()
     {
-        var res = await GlobalUtils.Client
+        var res = await ClientUtils.ClientInstance
             .GetStringAsync("https://api-v2-do.kas.fyi/token/krc20/trending");
 
         var obj = JsonConvert.DeserializeObject<Trending>(res);

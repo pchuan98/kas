@@ -25,6 +25,11 @@ public class CallbackModel
     public string CommandName { get; set; } = "";
 
     /// <summary>
+    /// 
+    /// </summary>
+    public string Receiver => IsGroup ? Group : Sender;
+
+    /// <summary>
     /// 命令集合
     /// </summary>
     public string[]? Args { get; set; }

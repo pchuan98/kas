@@ -1,25 +1,12 @@
 ﻿using System.Net.Http.Headers;
-using System.Reflection.PortableExecutable;
 using System.Text;
+using Chuan.Core;
 using Newtonsoft.Json;
-using Serilog.Debugging;
 
 namespace Gewechat;
 
 public partial class WeChat
 {
-    /// <summary>
-    /// 通用的基础client
-    /// </summary>
-    internal static readonly HttpClient BaseClient
-        = new(new HttpClientHandler()
-        {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-        })
-        {
-            Timeout = TimeSpan.FromSeconds(60)
-        };
-
     /// <summary>
     /// 
     /// </summary>
@@ -48,7 +35,7 @@ public partial class WeChat
                             "Headers:\n{headers}\n" +
                             "Body:\n{body}", url, JsonConvert.SerializeObject(headers, Formatting.Indented), body);
 
-        var response = await BaseClient.SendAsync(request);
+        var response = await ClientUtils.ClientInstance.SendAsync(request);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
@@ -68,7 +55,7 @@ public partial class WeChat
         var request = new HttpRequestMessage(HttpMethod.Post, url);
 
         request.Headers.Add("X-GEWE-TOKEN", $"{Token}");
-
+        //request.Headers.Add("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Content = new StringContent(body ?? "{}", Encoding.UTF8, "application/json");
 
@@ -76,10 +63,11 @@ public partial class WeChat
                             "Url: {url}.\n" +
                             "Body:\n{body}", url, body);
 
-        var response = await BaseClient.SendAsync(request);
+        var response = await ClientUtils.ClientInstance.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadAsStringAsync();
+
         Serilog.Log.Verbose("Result: {result}", JsonConvert.SerializeObject(result, Formatting.Indented));
         return result;
     }

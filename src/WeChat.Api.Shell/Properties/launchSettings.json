@@ -4,8 +4,8 @@
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": false,
-      "launchBrowser": false,
-      "launchUrl": "api/callback",
+      "launchBrowser": true,
+      "launchUrl": "api/callback/commands",
       "applicationUrl": "http://0.0.0.0:5099",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

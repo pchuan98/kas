@@ -10,4 +10,8 @@
 		<PackageReference Include="Serilog" Version="4.1.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\Chuan.Core\Chuan.Core.csproj" />
+	</ItemGroup>
 </Project>

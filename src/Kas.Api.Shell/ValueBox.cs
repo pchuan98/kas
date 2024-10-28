@@ -7,7 +7,7 @@ public static class ValueBox
     /// <summary>
     /// WeChat的地址
     /// </summary>
-    public static string WeChatApiBaseUrl = "http://localhost:5099/api";
+    public static string WeChatApiBaseUrl = "http://122.152.227.199:5099/api";
 
     /// <summary>
     /// 
