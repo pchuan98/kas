@@ -15,6 +15,12 @@ public class BaseTrendingObject
     /// </summary>
     [JsonProperty("count")]
     public long Count { get; set; }
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+
+    }
 }
 
 /// <summary>

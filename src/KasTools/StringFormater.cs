@@ -28,4 +28,20 @@ public static class StringFormater
         var months = (int)(time.TotalDays / 30);
         return $"{$"{months}m{(int)(time.TotalDays % 30)}d",6}";
     }
+
+    public static string ToHumanDateString(this DateTime t)
+    {
+        var time = DateTime.Now - t;
+
+        if (time.TotalMinutes < 60)
+            return "<1h";
+        if (time.TotalHours < 24)
+            return $"{(int)time.TotalHours,6}h";
+        if (time.TotalDays < 100)
+            return $"{(int)time.TotalDays,6}d";
+
+        // todo add year
+        var months = (int)(time.TotalDays / 30);
+        return $"{$"{months}m{(int)(time.TotalDays % 30)}d",6}";
+    }
 }
