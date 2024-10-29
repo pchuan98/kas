@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Chuan.Core;
 using KasTools.Models;
 using Newtonsoft.Json;
 
@@ -32,7 +33,7 @@ public static class TickerUtils
             };
 
 
-            var res = await GlobalUtils.Client
+            var res = await ClientUtils.ClientInstance
                 .GetStringAsync(
                     $"https://api-v2-do.kas.fyi/token/krc20/{ticker.ToUpper()}/info?includeCharts=true&interval={t}");
 

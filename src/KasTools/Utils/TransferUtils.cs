@@ -1,4 +1,5 @@
-﻿using KasTools.Converters;
+﻿using Chuan.Core;
+using KasTools.Converters;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -81,7 +82,7 @@ public static class TransferUtils
         var url = $"{BaseUrl}?ticker={ticker.ToUpper()}";
 
         var callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
-            await GlobalUtils.Client.GetStringAsync(url));
+            await ClientUtils.ClientInstance.GetStringAsync(url));
 
         var right = (decimal)callback?.NextCursor!;
         var left = (decimal)(callback?.NextCursor - 1000000000)!;
@@ -93,7 +94,7 @@ public static class TransferUtils
             url = $"{BaseUrl}?nextCursor={mid}&ticker={ticker.ToUpper()}";
 
             callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
-                await GlobalUtils.Client.GetStringAsync(url));
+                await ClientUtils.ClientInstance.GetStringAsync(url));
 
             if (callback?.PreviousCursor != null)
                 right = mid;
@@ -104,6 +105,8 @@ public static class TransferUtils
 
             Console.WriteLine($" {callback?.Transfers?.Length} -> {url}");
 
+            if (!(callback!.Transfers!.Length == 0 || callback.Transfers.Length == 50))
+                break;
 
         } while (right - left > 50);
 

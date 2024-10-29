@@ -31,7 +31,7 @@ Log.Logger = new LoggerConfiguration()
 //        : $"{mint.Ticker!.ToUpper(),-10}{mint.DeployedAt.ToHumanDateString(),-10}-> {string.Join(" ", sames.Select(item => item.Ticker))}");
 //}
 
-var name = "RAKUN";
+var name = "NACHO";
 
 //var trans = await TransferUtils.QueryAll(name);
 
