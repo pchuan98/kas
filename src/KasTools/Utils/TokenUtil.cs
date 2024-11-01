@@ -1,6 +1,7 @@
 ﻿using Chuan.Core;
 using KasTools.Models;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace KasTools.Utils;
 
@@ -14,11 +15,25 @@ public static class TokenUtil
 {
     public static async Task<Token[]?> QueryAll()
     {
-        var res = await ClientUtils.ClientInstance
-            .GetStringAsync("https://api-v2-do.kas.fyi/token/krc20/tokens");
+        try
+        {
+            var res = await ClientUtils.SafeGetString("https://api-v2-do.kas.fyi/token/krc20/tokens");
 
-        var obj = JsonConvert.DeserializeObject<TokensObject>(res);
+            if (string.IsNullOrEmpty(res))
+            {
+                Log.Error("TokenUtil QueryAll Error.");
+                return null;
+            }
 
-        return obj?.Data;
+            var obj = JsonConvert.DeserializeObject<TokensObject>(res);
+
+            return obj?.Data;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.Message);
+        }
+
+        return null;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,9 +34,8 @@ public static class TickerUtils
             };
 
 
-            var res = await ClientUtils.ClientInstance
-                .GetStringAsync(
-                    $"https://api-v2-do.kas.fyi/token/krc20/{ticker.ToUpper()}/info?includeCharts=true&interval={t}");
+            var res = await ClientUtils.SafeGetString(
+                $"https://api-v2-do.kas.fyi/token/krc20/{ticker.ToUpper()}/info?includeCharts=true&interval={t}");
 
             var obj = JsonConvert.DeserializeObject<KasInfo>(res);
             return obj;
@@ -46,5 +46,49 @@ public static class TickerUtils
         }
 
         return null;
+    }
+
+    public static async Task<KasInfo[]> QueryCharts(
+        IEnumerable<string> tickers,
+        ChartInterval interval = ChartInterval.D1,
+        int threadCount = 8)
+    {
+        var names = tickers as string[] ?? tickers.ToArray();
+        var hash = new ConcurrentDictionary<string, KasInfo>();
+
+        var nameQueue = new BlockingCollection<string>();
+        foreach (var name in names)
+            nameQueue.Add(name);
+
+        var tasks = new Task[threadCount];
+
+        for (var i = 0; i < threadCount; i++)
+            tasks[i] = Task.Run(async () =>
+            {
+                while (nameQueue.TryTake(out var name))
+                {
+                    if (string.IsNullOrEmpty(name)) break;
+
+                    var chart = await QueryChart(name.ToUpper(), interval);
+
+                    hash.TryAdd(name, chart ?? new KasInfo());
+                }
+            });
+
+        await Task.WhenAll(tasks);
+
+        return hash.Values.ToArray();
+
+        //Parallel.For(0, names.Length, new ParallelOptions()
+        //{
+        //    MaxDegreeOfParallelism = threadCount
+        //}, i =>
+        //{
+        //    var chart = QueryChart(names[i], interval).Result;
+
+        //    infos[i] = chart ?? new KasInfo();
+        //});
+
+        //return infos;
     }
 }

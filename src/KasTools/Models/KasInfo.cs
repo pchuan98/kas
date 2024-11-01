@@ -50,7 +50,7 @@ public partial class KasInfo
     /// Minted -> 实际显示少了8个0
     /// </summary>
     [JsonProperty("maxsupply")]
-    public decimal MaxSupply { get; set; }
+    public double MaxSupply { get; set; }
 
     /// <summary>
     /// Unknown
@@ -62,7 +62,7 @@ public partial class KasInfo
     /// Mint Count
     /// </summary>
     [JsonProperty("mintTotal")]
-    public decimal MintTotal { get; set; }
+    public double MintTotal { get; set; }
 
     /// <summary>
     /// Unknown
@@ -119,7 +119,7 @@ public partial class KasInfo
     public string Ticker { get; set; }
 
     [JsonProperty("totalMinted")]
-    public decimal TotalMinted { get; set; }
+    public double TotalMinted { get; set; }
 
     [JsonProperty("tradeVolume")]
     public TradeVolume TradeVolumeObj { get; set; }
@@ -150,7 +150,7 @@ partial class KasInfo
         /// 持有者持有数量
         /// </summary>
         [JsonProperty("amount")]
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
     }
 
 }

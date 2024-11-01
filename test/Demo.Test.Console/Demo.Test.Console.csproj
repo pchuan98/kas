@@ -8,11 +8,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="OpenCvSharp4" Version="4.10.0.20240616" />
+		<PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20240616" />
 		<PackageReference Include="Serilog" Version="4.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\funcs\Kas.Func.Mint\Kas.Func.Mint.csproj" />
 		<ProjectReference Include="..\..\src\Gewechat\Gewechat.csproj" />
 		<ProjectReference Include="..\..\src\KasTools\KasTools.csproj" />
 	</ItemGroup>

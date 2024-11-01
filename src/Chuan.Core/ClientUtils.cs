@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -39,5 +40,34 @@ public static class ClientUtils
         var result = await response.Content.ReadAsStringAsync();
         return result;
 
+    }
+
+    public static async Task<string> SafeGetString(string url)
+    {
+        var content = "";
+        var index = 10;
+
+        Serilog.Log.Verbose("Get String Url: {url}", url);
+
+        while (index-- != 0)
+        {
+            try
+            {
+                var response = await ClientInstance.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    await Task.Delay(1000);
+                    continue;
+                }
+                content = await response.Content.ReadAsStringAsync();
+                break;
+            }
+            catch (Exception e)
+            {
+                Serilog.Log.Error(e.Message);
+            }
+        }
+
+        return content;
     }
 }

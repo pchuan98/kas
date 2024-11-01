@@ -1,10 +1,18 @@
-﻿using KasTools;
+﻿using System.Data;
+using System.Net;
+using System.Runtime.CompilerServices;
+using Chuan.Core;
+using Kas.Func.Mint;
+using KasTools;
+using KasTools.Models;
 using KasTools.Utils;
+using MathNet.Numerics;
 using Newtonsoft.Json;
+using OpenCvSharp;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Verbose()
+    .MinimumLevel.Debug()
     .WriteTo.Console()
     .CreateLogger();
 
@@ -31,14 +39,117 @@ Log.Logger = new LoggerConfiguration()
 //        : $"{mint.Ticker!.ToUpper(),-10}{mint.DeployedAt.ToHumanDateString(),-10}-> {string.Join(" ", sames.Select(item => item.Ticker))}");
 //}
 
-var name = "NACHO";
 
-//var trans = await TransferUtils.QueryAll(name);
+//var name = "burt";
 
-//var json = JsonConvert.SerializeObject(trans);
 
-//File.WriteAllText("TRANS", json);
+//var trans = await TransferUtils.QueryAll(name, 256);
+//File.WriteAllText("burt.txt", JsonConvert.SerializeObject(trans.OrderByDescending(item => item.OperationScore)));
 
-await TransferUtils.QueryAll(name);
+//var current = DateTime.Now;
+//var mint = trans.Where(item => item is { Operation: "MINT" })
+//    .GroupBy(item => (int)(current - item.UpdatedAt)!.Value.TotalMinutes / 60)
+//    .Select(item => new { Key = item.Key, Items = item.ToArray() });
 
-// 938115450000 -> 938114450000
+//foreach (var m in mint)
+//{
+//    Console.WriteLine($"{m.Key,-10}" +
+//                      $"{m.Items.Where(item => item.OpAccepted == 1).Sum(item => item.Amount) / 100000000000,-15}" +
+//                      $"{m.Items.Sum(item => item.Amount) / 100000000000,-15}" +
+//                      $"{m.Items.Count(item => item.OpAccepted == 1),-15}" +
+//                      $"{m.Items.Count(item => item.OpAccepted != 1),-15}");
+//}
+
+
+//DrawCurve(mint.Select(item => (double)item.Key).ToArray()
+//    , mint.Select(item => (double)item.Items.Length).ToArray());
+
+
+
+// todo
+//var trending = await TrendingUtils.QueryAll();
+
+//var transfers = await TickerUtils.QueryCharts(
+//    trending?.MostTransferred
+//        ?.Take(20)
+//        .Select(item => item.Ticker)!,
+//    ChartInterval.Y1,
+//    threadCount: 32);
+
+//var mintsTrans = await TickerUtils.QueryCharts(
+//    trending?.MostMinted?.Select(item => item.Ticker)!);
+
+//foreach (var mint in trending?.MostMinted!)
+//{
+//    var ticker = mintsTrans.FirstOrDefault(item => item.Ticker == mint.Ticker);
+//    var time = ticker!.DeployedAt.ToHumanDateString();
+//    var holders = ticker.Holders.Select(item => item.Address)?.Where(item => !string.IsNullOrEmpty(item));
+
+//    var back = string.Join(",", transfers
+//        .Where(
+//            item => holders != null
+//                    && item!.Holders
+//                        .OrderByDescending(holder => holder.Amount)
+//                        .Take(10)
+//                        !.Select(holder => holder.Address)
+//                        .Intersect(holders)
+//                        .Any()
+//        )
+//        .Select(item => item.Ticker)
+//    );
+
+//    Console.WriteLine($"{mint.Ticker,-10}\t{time,10}\t{mint.Count,-10}\t{string.Join(",", back)}");
+//}
+
+
+
+var tokens = await TokenUtil.QueryAll();
+var mints = (await MintUtil.QueryAllMint(tokens))
+    .OrderByDescending(item => item.DeployedAt.Ticks)
+    .ToList();
+
+
+mints.ForEach(mint =>
+{
+    var name = mint.Ticker!.ToUpper();
+
+    var info = MintManager.ParseMint(name, tokens: tokens).Result;
+
+    Console.WriteLine(info);
+
+    Console.WriteLine(new string('=', 32));
+    Console.WriteLine();
+});
+
+
+static Mat DrawNormalizedCurve(IEnumerable<(IEnumerable<double> x, IEnumerable<double> y)> sets)
+{
+    var image = new Mat(800, 1500, MatType.CV_8UC3);
+
+    foreach (var (x, y) in sets)
+    {
+        var xvals = x as double[] ?? x.ToArray();
+        var yvals = y as double[] ?? y.ToArray();
+
+        var xmin = xvals.Min();
+        var xmax = xvals.Max();
+        var ymin = yvals.Min();
+        var ymax = yvals.Max();
+
+        var points = new List<Point>();
+        for (var i = 0; i < xvals.Length; i++)
+        {
+            var normX = 10 + (int)((xvals[i] - xmin) / (xmax - xmin + 1) * (image.Width - 20));
+            var normY = image.Height - 10 - (int)((yvals[i] - ymin) / (ymax - ymin + 1) * (image.Height - 20));
+            points.Add(new Point(normX, normY));
+        }
+
+        Cv2.Polylines(image,
+            [points],
+            false,
+            new Scalar(Random.Shared.NextInt64(100, 255), Random.Shared.NextInt64(100, 255), Random.Shared.NextInt64(100, 255)),
+            2);
+    }
+
+    return image;
+}

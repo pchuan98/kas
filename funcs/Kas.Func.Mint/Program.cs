@@ -10,7 +10,7 @@ Log.Logger = new LoggerConfiguration()
 // зЂВс command
 var commands = new List<RegisterModel>()
 {
-    //new RegisterModel("price","http://122.152.227.199:5098/api/price")
+    new("/mint","http://122.152.227.199:5098/api/price")
 };
 
 commands.ForEach(command =>

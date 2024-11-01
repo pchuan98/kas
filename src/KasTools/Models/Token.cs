@@ -35,37 +35,37 @@ public class Token
     /// Minted -> 实际显示少了8个0
     /// </summary>
     [JsonProperty("maxSupply")]
-    public decimal MaxSupply { get; set; }
+    public double MaxSupply { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("mintLimit")]
-    public decimal MintLimit { get; set; }
+    public double MintLimit { get; set; }
 
     /// <summary>
     /// Mint Count
     /// </summary>
     [JsonProperty("mintTotal")]
-    public decimal MintTotal { get; set; }
+    public double MintTotal { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("opScoreCreated")]
-    public decimal OpscoreCreated { get; set; }
+    public double OpscoreCreated { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("opScoreUpdated")]
-    public decimal OpscoreUpdated { get; set; }
+    public double OpscoreUpdated { get; set; }
 
     /// <summary>
     /// Mint Count
     /// </summary>
     [JsonProperty("preMint")]
-    public decimal PreMint { get; set; }
+    public double PreMint { get; set; }
 
     /// <summary>
     /// 价格相关参数
@@ -104,7 +104,7 @@ public class Token
     /// 
     /// </summary>
     [JsonProperty("totalMinted")]
-    public decimal TotalMinted { get; set; }
+    public double TotalMinted { get; set; }
 
     /// <summary>
     /// 24h 统计结果
