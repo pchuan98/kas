@@ -1,20 +1,21 @@
-﻿using System.Data;
-using System.Net;
-using System.Runtime.CompilerServices;
-using Chuan.Core;
-using Kas.Func.Mint;
-using KasTools;
-using KasTools.Models;
-using KasTools.Utils;
-using MathNet.Numerics;
-using Newtonsoft.Json;
+﻿using KasTools.Utils;
 using OpenCvSharp;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Verbose()
     .WriteTo.Console()
     .CreateLogger();
+
+while (true)
+{
+    var res = await TokenUtil.QueryAll();
+
+    Log.Debug(res.Length.ToString());
+}
+
+
+
 
 
 //var mints = await MintUtil.QueryAllMint();
@@ -103,23 +104,13 @@ Log.Logger = new LoggerConfiguration()
 
 
 
-var tokens = await TokenUtil.QueryAll();
-var mints = (await MintUtil.QueryAllMint(tokens))
-    .OrderByDescending(item => item.DeployedAt.Ticks)
-    .ToList();
+//var tokens = await TokenUtil.QueryAll();
 
 
-mints.ForEach(mint =>
-{
-    var name = mint.Ticker!.ToUpper();
 
-    var info = MintManager.ParseMint(name, tokens: tokens).Result;
+//var info = MintManager.ParseMint("lickin", tokens: tokens).Result;
 
-    Console.WriteLine(info);
-
-    Console.WriteLine(new string('=', 32));
-    Console.WriteLine();
-});
+//Console.WriteLine(info);
 
 
 static Mat DrawNormalizedCurve(IEnumerable<(IEnumerable<double> x, IEnumerable<double> y)> sets)

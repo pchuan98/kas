@@ -10,7 +10,11 @@ Log.Logger = new LoggerConfiguration()
 // зЂВс command
 var commands = new List<RegisterModel>()
 {
-    new("price","http://122.152.227.199:5098/api/price")
+#if DEBUG
+    new("price","http://100.77.255.127:5098/api/price")
+#else
+        new("price","http://122.152.227.199:5098/api/price")
+#endif
 };
 
 commands.ForEach(command =>

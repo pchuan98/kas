@@ -12,8 +12,6 @@ namespace Kas.Func.AutoPrice.Controllers;
 /// </summary>
 public class AliveInfo
 {
-    public DateTime Time { get; set; }
-
     /// <summary>
     /// 
     /// </summary>
@@ -93,9 +91,11 @@ public class PriceController : ControllerBase
         }
         else args = last!.ToHashSet();
 
-
-        if (AliveKasInfo.Tokens.Data is null)
+        if (AliveKasInfo.Tokens.Data is null
+            || !AliveKasInfo.Tokens.Time.LessThan3Minutes())
             await AliveKasInfo.UpdateTokens();
+
+
 
         if (AliveKasInfo.Tokens.Data is null)
         {
@@ -103,12 +103,9 @@ public class PriceController : ControllerBase
             return;
         }
 
-        if (!AliveKasInfo.Tokens.Time.LessThanHalfHour())
-            await AliveKasInfo.UpdateTokens();
-
         var tokens = AliveKasInfo.Tokens.Data;
 
-        var msg = $"[TIME] {DateTime.Now:MM-dd HH:mm:ss}\n\n";
+        var msg = $"[TIME] {AliveKasInfo.Tokens.Time:MM-dd HH:mm:ss}\n\n";
         foreach (var name in args!)
         {
             var token = tokens?.FirstOrDefault(token => token.Ticker?.ToUpper().Trim() == $"{name.ToUpper().Trim()}");

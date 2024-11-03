@@ -1,13 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Serilog;
 
 namespace Chuan.Core;
 
 public static class ClientUtils
 {
-    private static HttpClient? _client = new HttpClient();
+    private static HttpClient? _client;
 
     public static HttpClient ClientInstance
     {
@@ -20,12 +20,10 @@ public static class ClientUtils
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             })
             {
-                Timeout = TimeSpan.FromSeconds(60) // todo 多次获取结果
+                Timeout = TimeSpan.FromSeconds(20)
             };
 
             _client.DefaultRequestVersion = HttpVersion.Version20;
-            _client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-            _client.DefaultRequestHeaders.Connection.Add("keep-alive");
 
             return _client;
         }
@@ -42,32 +40,81 @@ public static class ClientUtils
 
     }
 
-    public static async Task<string> SafeGetString(string url)
+    public static async Task<string> SafeGetString(string url, Dictionary<string, string>? headers = null)
     {
         var content = "";
         var index = 10;
 
-        Serilog.Log.Verbose("Get String Url: {url}", url);
+        if (headers is not null)
+        {
+            ClientInstance.DefaultRequestHeaders.Clear();
+
+            ClientInstance.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            ClientInstance.DefaultRequestHeaders.Connection.Add("keep-alive");
+
+            foreach (var key in headers.Keys)
+                ClientInstance.DefaultRequestHeaders.Add(key, headers[key]);
+        }
+
+        Log.Verbose(ClientInstance.DefaultRequestHeaders.Aggregate("",
+            (current, header) =>
+                current + $"\n{header.Key}: {string.Join(", ", header.Value)}"));
+
+        Log.Verbose("Get String Url: {url}", url);
 
         while (index-- != 0)
         {
             try
             {
                 var response = await ClientInstance.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                {
-                    await Task.Delay(1000);
-                    continue;
-                }
-                content = await response.Content.ReadAsStringAsync();
-                break;
+                if (response.IsSuccessStatusCode)
+                    return await response.Content.ReadAsStringAsync();
+
+                Log.Warning(response.ToString());
+                await Task.Delay(1000);
             }
             catch (Exception e)
             {
-                Serilog.Log.Error(e.Message);
+                Log.Error(e.Message);
             }
         }
 
         return content;
+    }
+
+    public static async Task<string?> SafeGetStringOnce(string url, Dictionary<string, string>? headers = null)
+    {
+        if (headers is not null)
+        {
+            ClientInstance.DefaultRequestHeaders.Clear();
+
+            ClientInstance.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            ClientInstance.DefaultRequestHeaders.Connection.Add("keep-alive");
+
+            foreach (var key in headers.Keys)
+                ClientInstance.DefaultRequestHeaders.Add(key, headers[key]);
+        }
+
+        Log.Verbose(ClientInstance.DefaultRequestHeaders.Aggregate("",
+            (current, header) =>
+                current + $"\n{header.Key}: {string.Join(", ", header.Value)}"));
+
+        Log.Verbose("Get String Url: {url}", url);
+
+        try
+        {
+            var response = await ClientInstance.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+                return await response.Content.ReadAsStringAsync();
+
+            Log.Warning(response.ToString());
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.Message);
+            return null;
+        }
+        return null;
     }
 }

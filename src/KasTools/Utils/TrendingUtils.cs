@@ -8,8 +8,7 @@ public static class TrendingUtils
 {
     public static async Task<Trending?> QueryAll()
     {
-        var res = await ClientUtils.ClientInstance
-            .GetStringAsync("https://api-v2-do.kas.fyi/token/krc20/trending");
+        var res = await ClientUtils.SafeGetString("https://api-v2-do.kas.fyi/token/krc20/trending");
 
         var obj = JsonConvert.DeserializeObject<Trending>(res);
 

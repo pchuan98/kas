@@ -15,6 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\funcs\Kas.Func.AutoPrice\Kas.Func.AutoPrice.csproj" />
 		<ProjectReference Include="..\..\funcs\Kas.Func.Mint\Kas.Func.Mint.csproj" />
 		<ProjectReference Include="..\..\src\Gewechat\Gewechat.csproj" />
 		<ProjectReference Include="..\..\src\KasTools\KasTools.csproj" />

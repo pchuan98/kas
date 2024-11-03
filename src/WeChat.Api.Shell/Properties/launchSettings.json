@@ -5,8 +5,8 @@
       "commandName": "Project",
       "dotnetRunMessages": false,
       "launchBrowser": true,
-      "launchUrl": "api/callback/commands",
-      "applicationUrl": "http://0.0.0.0:5099",
+      "launchUrl": "api/login",
+      "applicationUrl": "http://100.77.255.127:5099",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
