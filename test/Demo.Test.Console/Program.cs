@@ -1,18 +1,13 @@
-﻿using KasTools.Utils;
+﻿using Kas.Func.Mint;
+using KasTools.Utils;
 using OpenCvSharp;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Verbose()
+    //.MinimumLevel.Verbose()
     .WriteTo.Console()
     .CreateLogger();
 
-while (true)
-{
-    var res = await TokenUtil.QueryAll();
-
-    Log.Debug(res.Length.ToString());
-}
 
 
 
@@ -104,13 +99,13 @@ while (true)
 
 
 
-//var tokens = await TokenUtil.QueryAll();
+var tokens = await TokenUtil.QueryAll();
 
 
 
-//var info = MintManager.ParseMint("lickin", tokens: tokens).Result;
+var info = MintManager.ParseMint("phant", tokens: tokens).Result;
 
-//Console.WriteLine(info);
+Console.WriteLine(info);
 
 
 static Mat DrawNormalizedCurve(IEnumerable<(IEnumerable<double> x, IEnumerable<double> y)> sets)

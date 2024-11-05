@@ -1,0 +1,16 @@
+{
+  "name": "kas",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "local-package": "file:./wasm"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "bun index.ts",
+    "build": "bun build --compile index.ts --outfile dist/index && dist\\index.exe"
+  }
+}
