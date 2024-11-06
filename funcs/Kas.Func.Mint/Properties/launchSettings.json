@@ -4,7 +4,7 @@
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "mint",
       "applicationUrl": "http://127.0.0.1:9999",
       "environmentVariables": {
