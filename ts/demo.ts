@@ -42,7 +42,7 @@ log.info({
 	"is_sync": info.isSynced,
 });
 
-const sender = new kaspa.tran("testnet-10", pkey, client);
+// const sender = new kaspa.tra("testnet-10", pkey, client);
 
 await client.disconnect();
 log.info("Disconnected");
