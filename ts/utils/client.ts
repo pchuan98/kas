@@ -178,7 +178,7 @@ export class KaspaClient {
 }
 
 const rpc = new kaspa.RpcClient({
-    url: "127.0.0.1",
+    url: "vpn.pchuan.site",
     networkId: "testnet-10",
     encoding: kaspa.Encoding.Borsh,
 });
@@ -191,8 +191,8 @@ console.log(info);
 const processor = new UtxoProcessor({ rpc: rpc, networkId: "testnet-10" });
 const context = new UtxoContext({ processor: processor });
 
-const fromAddr = "kaspatest:qp7uq35snucwdl8xyz8cj2r4s56sa0w3wpp0e4lg0ge5lcsqp4crj97gwl4s3";
-const toAddr = "kaspatest:qrcehetm28xr5w45jwmt35qqy36v7y6d4qw6zrpa9x80g6npdky8507dtnr3v";
+const toAddr = "kaspatest:qp7uq35snucwdl8xyz8cj2r4s56sa0w3wpp0e4lg0ge5lcsqp4crj97gwl4s3";
+const fromAddr = "kaspatest:qrcehetm28xr5w45jwmt35qqy36v7y6d4qw6zrpa9x80g6npdky8507dtnr3v";
 
 processor.addEventListener("utxo-proc-start", async () => {
     log.info("utxo processor started");
@@ -209,12 +209,34 @@ processor.addEventListener("utxo-proc-start", async () => {
 });
 processor.start();
 
+// rpc.subscribeBlockAdded();
+
+rpc.subscribeUtxosChanged([
+    fromAddr,
+    toAddr
+]);
+
+rpc.addEventListener("utxos-changed", async (event) => {
+    // console.log("UTXO IN");
+    // console.log(event.data.added);
+    // console.log("UTXO OUT");
+    // console.log(event.data.removed);
+    // console.log("UTXO OFF");
+
+    await new Promise(resolve => setTimeout(resolve, 10000));
+
+
+    console.log((await rpc.getBalanceByAddress({ address: fromAddr })).balance);
+    console.log((await rpc.getBalanceByAddress({ address: toAddr })).balance);
+});
+
+
 await new Promise(resolve => setTimeout(resolve, 1000));
 
 const payload: kaspa.IPaymentOutput[] = [
     {
         address: toAddr,
-        amount: kaspa.kaspaToSompi("100")!
+        amount: kaspa.kaspaToSompi("1")!
     }
 ]
 
@@ -232,10 +254,10 @@ const { transactions, summary } = await kaspa.createTransactions({
 });
 
 console.log(kaspa.calculateTransactionFee("testnet-10", transactions[0].transaction));
-console.log(kaspa.calculateTransactionMass("testnet-10", transactions[0].transaction));
+// console.log(kaspa.calculateTransactionMass("testnet-10", transactions[0].transaction));
 
 const trans = transactions[0];
-trans.sign([new kaspa.PrivateKey("40c67afc725a0ef35e7f6808cf24f88b4b7287a3861682fec4180d1a2511d57c")]);
+trans.sign([new kaspa.PrivateKey("064e6af82ef976ff4bb6d5bbb50c6f7958bfb88cba952b0dd3bcd9ed9e80f348")]);
 await trans.submit(rpc);
 
 for (let i = 1; i < transactions.length; i++) {
@@ -247,10 +269,16 @@ for (let i = 1; i < transactions.length; i++) {
 
 console.log(summary.finalTransactionId);
 
+
 // print blance
-console.log((await rpc.getBalanceByAddress({ address: fromAddr })).balance);
-console.log((await rpc.getBalanceByAddress({ address: toAddr })).balance);
 
-// console.log(summary.toString());
 
-await rpc.disconnect();
+console.log(summary.toJSON());
+
+// await rpc.disconnect();
+
+
+const wallet = new kaspa.Wallet({
+    networkId: "testnet-10",
+    encoding: kaspa.Encoding.Borsh,
+});
