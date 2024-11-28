@@ -42,17 +42,17 @@ public class PriceModel
     /// Floor KAS Price
     /// </summary>
     [JsonProperty("floorPrice")]
-    public double FloorPrice { get; set; }
+    public double? FloorPrice { get; set; }
 
     /// <summary>
     /// 市值
     /// </summary>
     [JsonProperty("marketCapInUsd")]
-    public double MarketcapInUsd { get; set; }
+    public double? MarketcapInUsd { get; set; }
 
     /// <summary>
     /// 24h的改变值
     /// </summary>
     [JsonProperty("change24h")]
-    public double Change24H { get; set; }
+    public double? Change24H { get; set; }
 }

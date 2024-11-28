@@ -20,13 +20,13 @@ public partial class KasInfo
     public DateTime DeployedAt { get; set; }
 
     [JsonProperty("deployerAddress")]
-    public string DeployedAddress { get; set; }
+    public string? DeployedAddress { get; set; }
 
     /// <summary>
     /// 持有的总人数
     /// </summary>
     [JsonProperty("holderTotal")]
-    public long HolderTotal { get; set; }
+    public long? HolderTotal { get; set; }
 
     /// <summary>
     /// 前50个持有者
@@ -50,37 +50,37 @@ public partial class KasInfo
     /// Minted -> 实际显示少了8个0
     /// </summary>
     [JsonProperty("maxsupply")]
-    public double MaxSupply { get; set; }
+    public double? MaxSupply { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("mintLimit")]
-    public decimal MintLimit { get; set; }
+    public decimal? MintLimit { get; set; }
 
     /// <summary>
     /// Mint Count
     /// </summary>
     [JsonProperty("mintTotal")]
-    public double MintTotal { get; set; }
+    public double? MintTotal { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("opscorecreated")]
-    public decimal OpscoreCreated { get; set; }
+    public decimal? OpscoreCreated { get; set; }
 
     /// <summary>
     /// Unknown
     /// </summary>
     [JsonProperty("opscoreUpdated")]
-    public decimal OpscoreUpdated { get; set; }
+    public decimal? OpscoreUpdated { get; set; }
 
     /// <summary>
     /// Premint = value / TotalMinted
     /// </summary>
     [JsonProperty("preMint")]
-    public decimal PreMint { get; set; }
+    public decimal? PreMint { get; set; }
 
     /// <summary>
     /// 价格相关参数

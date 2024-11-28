@@ -21,7 +21,7 @@ namespace KasTools.Utils;
 public class Transfer
 {
     [JsonProperty("amount")]
-    public decimal? Amount { get; set; }
+    public double? Amount { get; set; }
 
     [JsonProperty("createdAt")]
     [JsonConverter(typeof(UnixTimestampConverter))]
@@ -48,14 +48,14 @@ public class Transfer
     [JsonProperty("toAddress")]
     public string? ToAddress { get; set; }
 
+    [JsonProperty("revealFee")]
+    public double? RevealFee { get; set; }
+
     [JsonProperty("updatedAt")]
     [JsonConverter(typeof(UnixTimestampConverter))]
     public DateTime? UpdatedAt { get; set; }
 
-    public override string ToString()
-    {
-        return JsonConvert.SerializeObject(this, Formatting.Indented);
-    }
+    public override string ToString() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
     public static bool operator ==(Transfer? u1, Transfer? u2)
         => (u1 is not null && u2 is not null)
@@ -85,9 +85,169 @@ public class TransferCallbackModel
     public Transfer[]? Transfers { get; set; }
 }
 
+
+
 public static class TransferUtils
 {
     internal const string BASE_URL = "https://api-v2-do.kas.fyi/token/krc20/transactions";
+
+    public static async Task<double> QueryPerMintCount(string ticker, ulong? end = null)
+    {
+        ticker = ticker.ToUpper();
+        var url = $"{BASE_URL}?ticker={ticker.ToUpper()}";
+
+        var callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
+            await ClientUtils.ClientInstance.GetStringAsync(url));
+
+        if (callback?.NextCursor is null) return 0;
+
+        var start = (ulong)callback?.NextCursor!;
+        end ??= (ulong)1;
+
+        var right = start;
+        var left = (ulong)end;
+        var mid = (left + (right - left) / 2);
+
+        do
+        {
+            url = $"{BASE_URL}?nextCursor={mid}&ticker={ticker.ToUpper()}";
+
+            callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
+                await ClientUtils.ClientInstance.GetStringAsync(url));
+
+            if (callback?.PreviousCursor != null)
+                right = mid;
+            else
+                left = mid;
+
+            mid = left + (right - left) / 2;
+
+            Log.Logger.Verbose("Detect [{count,-2}] -> {url}", callback?.Transfers?.Length, url);
+
+            if (callback
+                    ?.Transfers
+                    ?.Any(item => item.Operation?.ToUpper() == "MINT" && item.OpAccepted == 1) == true)
+                break;
+
+        } while (right - left > 50);
+
+        var amount = callback?.Transfers
+            ?.FirstOrDefault(item => item.Operation?.ToUpper() == "MINT" && item.OpAccepted == 1)
+            ?.Amount ?? 0;
+
+        return amount / 100000000;
+    }
+
+    public static async Task<Dictionary<string, double>> QueryPerMintCounts(IEnumerable<string> tickers, int count = 8)
+    {
+        var results = new Dictionary<string, double>();
+        var semaphore = new SemaphoreSlim(count);
+        var tasks = new List<Task>();
+
+        foreach (var ticker in tickers)
+        {
+            await semaphore.WaitAsync();
+
+            var task = Task.Run(async () =>
+            {
+                try
+                {
+                    var recall = await QueryPerMintCount(ticker);
+                    lock (results)
+                    {
+                        results[ticker] = recall;
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            tasks.Add(task);
+        }
+
+        await Task.WhenAll(tasks);
+
+        return results;
+    }
+
+    public static async Task<Dictionary<string, (ulong Start, ulong End)>> QueryRanges(IEnumerable<string> tickers, int count = 8)
+    {
+        var results = new Dictionary<string, (ulong Start, ulong End)>();
+        var semaphore = new SemaphoreSlim(count);
+        var tasks = new List<Task>();
+
+        foreach (var ticker in tickers)
+        {
+            await semaphore.WaitAsync();
+
+            var task = Task.Run(async () =>
+            {
+                try
+                {
+                    var range = await QueryRange(ticker);
+                    lock (results)
+                    {
+                        results[ticker] = range;
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            tasks.Add(task);
+        }
+
+        await Task.WhenAll(tasks);
+
+        return results;
+    }
+
+    public static async Task<(ulong Start, ulong End)> QueryRange(string ticker)
+    {
+        ticker = ticker.ToUpper();
+        var url = $"{BASE_URL}?ticker={ticker.ToUpper()}";
+
+        var callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
+            await ClientUtils.ClientInstance.GetStringAsync(url));
+
+        var start = (ulong)callback?.NextCursor!;
+        var end = (ulong)1;
+
+        var right = start;
+        var left = end;
+        var mid = (left + (right - left) / 2);
+
+        do
+        {
+            url = $"{BASE_URL}?nextCursor={mid}&ticker={ticker.ToUpper()}";
+
+            callback = JsonConvert.DeserializeObject<TransferCallbackModel>(
+                await ClientUtils.ClientInstance.GetStringAsync(url));
+
+            if (callback?.PreviousCursor != null)
+                right = mid;
+            else
+                left = mid;
+
+            mid = left + (right - left) / 2;
+
+            Log.Logger.Verbose("Detect [{count,-2}] -> {url}", callback?.Transfers?.Length, url);
+
+            if (!(callback!.Transfers!.Length == 0 || callback.Transfers.Length == 50))
+                break;
+
+        } while (right - left > 50);
+
+        end = mid;
+
+        return right - left <= 50 ?
+            ((ulong Start, ulong End))(0, 0)
+            : ((ulong)start!, (ulong)end!);
+    }
 
     /// <summary>
     /// 
@@ -178,7 +338,10 @@ public static class TransferUtils
         while (semaphore.CurrentCount != threadCount)
         {
             await Task.Delay(5000);
-            Log.Debug("HASH -> {hash,-20}| Lock -> {count,-3} / {all,-3}", hash.Count, semaphore.CurrentCount, threadCount);
+            Log.Debug("HASH -> {hash,-20}| Lock -> {count,-3} / {all,-3}", hash.Count, semaphore.CurrentCount,
+                threadCount);
+
+            if (hash.Keys.Count > 1000) break;
         }
 
         //for (var i = 0; i < count; i++)
@@ -204,7 +367,7 @@ public static class TransferUtils
 
     internal static async Task QueryCore(
         string name,
-       ulong start,
+        ulong start,
         ulong end,
         BlockingCollection<string> queue,
         ConcurrentDictionary<ulong, Transfer> hash,
@@ -275,7 +438,7 @@ public static class TransferUtils
     {
         if (start <= end)
         {
-            Log.Debug("Exit -> Start <= End");
+            Log.Debug("Exit -> Start must be greater than End");
             return;
         }
 
@@ -286,10 +449,24 @@ public static class TransferUtils
         Task.Run(() =>
         {
             semaphore.Wait();
-            var leftUrl = $"{BASE_URL}?nextCursor={start}&ticker={name}";
 
-            var str = ClientUtils.SafeGetString(leftUrl).Result;
-            semaphore.Release();
+            string leftUrl, str;
+
+            try
+            {
+                leftUrl = $"{BASE_URL}?nextCursor={start}&ticker={name}";
+                str = ClientUtils.SafeGetString(leftUrl).Result;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+
             Log.Debug("[{count}] Query url -> {url}", semaphore.CurrentCount, leftUrl);
 
             if (string.IsNullOrEmpty(str))
@@ -321,17 +498,28 @@ public static class TransferUtils
                 Log.Debug("Exit -> LL < Start");
                 return;
             }
-
-
         });
 
         Task.Run(() =>
         {
             semaphore.Wait();
-            var rightUrl = $"{BASE_URL}?nextCursor={mid}&ticker={name}";
+            string rightUrl, str;
 
-            var str = ClientUtils.SafeGetString(rightUrl).Result;
-            semaphore.Release();
+            try
+            {
+                rightUrl = $"{BASE_URL}?nextCursor={mid}&ticker={name}";
+                str = ClientUtils.SafeGetString(rightUrl).Result;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+
             Log.Debug("[{count}] Query url -> {url}", semaphore.CurrentCount, rightUrl);
 
             if (string.IsNullOrEmpty(str))
@@ -364,8 +552,6 @@ public static class TransferUtils
                 return;
             }
         });
-
-
     }
 
     public static async Task<IEnumerable<Transfer>> QueryAllMint(string ticker, IEnumerable<Transfer>? transfers = null)

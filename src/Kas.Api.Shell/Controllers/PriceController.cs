@@ -65,7 +65,7 @@ public class PriceController : ControllerBase
                 LastArgs[receiver] = args?.ToArray();
         }
         else args = last!.ToHashSet();
-        
+
 
         if (ValueBox.AliveKasInfo.Tokens.Data is null)
             await ValueBox.AliveKasInfo.UpdateTokens();
@@ -88,7 +88,9 @@ public class PriceController : ControllerBase
             var token = tokens?.FirstOrDefault(token => token.Ticker?.ToUpper().Trim() == $"{name.ToUpper().Trim()}");
             if (token is null) continue;
 
-            msg += $"[烟花] {name.ToUpper().Trim(),-10} : {token?.Price?.FloorPrice:F8} KAS\n";
+            var price = token.PriceHistories?.OrderByDescending(item => item.Time)?.FirstOrDefault()?.Price;
+
+            msg += $"[烟花] {name.ToUpper().Trim(),-10} : {price:F8} KAS\n";
         }
 
         await request.SendMessage(msg);

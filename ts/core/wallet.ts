@@ -77,7 +77,13 @@ const mnemonic = "cliff party catalog today outside catalog awake stem chair raw
 //     console.log((await rpc.getBalanceByAddress({ address: key })).balance);
 // }
 
-console.log((await rpc.getUtxosByAddresses([getPublicKey(getReceivePrivateKey(mnemonic, 0, 1))])).entries.length);
+const utxos = (await rpc.getUtxosByAddresses([getPublicKey(getReceivePrivateKey(mnemonic, 0, 0))])).entries;
+
+for (const utxo of utxos) {
+    console.log(`${utxo.isCoinbase} ${kaspa.sompiToKaspaString(utxo.amount)}`);
+}
+
+console.log(kaspa.calculateTransactionMass("testnet-10", utxos[0].t, 1));
 
 rpc.disconnect();
 

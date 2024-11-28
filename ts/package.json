@@ -2,18 +2,20 @@
   "name": "kas",
   "module": "index.ts",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/minimist": "^1.2.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "scripts": {
     "dev": "bun index.ts",
-    "build": "bun build --compile index.ts --outfile dist/index && dist\\index.exe"
+    "build": "bun build --compile --minify --sourcemap tiny.ts --outfile dist/tiny --external '*' --packages external && dist\\tiny.exe"
   },
   "type": "module",
   "dependencies": {
     "kaspa-chuan": "^0.15.3",
+    "minimist": "^1.2.8",
     "tslog": "^4.9.3"
   }
 }

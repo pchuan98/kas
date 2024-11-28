@@ -91,27 +91,78 @@ public class PriceController : ControllerBase
         }
         else args = last!.ToHashSet();
 
-        if (AliveKasInfo.Tokens.Data is null
-            || !AliveKasInfo.Tokens.Time.LessThan3Minutes())
-            await AliveKasInfo.UpdateTokens();
+        //if (AliveKasInfo.Tokens.Data is null
+        //    || !AliveKasInfo.Tokens.Time.LessThan3Minutes())
+        //    await AliveKasInfo.UpdateTokens();
 
+        //if (AliveKasInfo.Tokens.Data is null)
+        //{
+        //    Serilog.Log.Error("AliveKasInfo Get Tokens Error.");
+        //    return;
+        //}
 
+        //var tokens = AliveKasInfo.Tokens.Data;
 
-        if (AliveKasInfo.Tokens.Data is null)
+        var msg = $"[TIME] {DateTime.Now:MM-dd HH:mm:ss}\n\n";
+
+        var charts = await TickerUtils.QueryCharts(args!);
+
+        //var marketInfo = await MarketUtils.Query();
+
+        if (!System.IO.File.Exists("TokensIds"))
+            await System.IO.File.WriteAllTextAsync("TokensIds", "");
+
+        var oks = (await System.IO.File.ReadAllLinesAsync("TokensIds"))
+            .SkipWhile(string.IsNullOrEmpty)
+            .Where(item => item.Contains(","))
+            .Select(item => (item.Split([','])[0], double.Parse(item.Split([','])[1])))
+            .ToHashSet();
+
+        var oksStr = oks.Select(item => item.Item1.ToUpper()).ToHashSet();
+        var argsStr = args.Select(item => item.ToUpper());
+
+        var diff = argsStr.Except(oksStr).ToList();
+        if (diff.Any())
         {
-            Serilog.Log.Error("AliveKasInfo Get Tokens Error.");
-            return;
+            await request.SendMessage("有新数据待加载，请稍等");
+            var result = await TransferUtils.QueryPerMintCounts(diff);
+
+            foreach (var item in result)
+                await System.IO.File.AppendAllTextAsync("TokensIds", $"{item.Key.ToUpper()},{item.Value}\n");
         }
 
-        var tokens = AliveKasInfo.Tokens.Data;
+        oks = (await System.IO.File.ReadAllLinesAsync("TokensIds"))
+            .SkipWhile(string.IsNullOrEmpty)
+            .Where(item => item.Contains(","))
+            .Select(item => (item.Split([','])[0], double.Parse(item.Split([','])[1])))
+            .ToHashSet();
 
-        var msg = $"[TIME] {AliveKasInfo.Tokens.Time:MM-dd HH:mm:ss}\n\n";
-        foreach (var name in args!)
+        foreach (var arg in args!)
         {
-            var token = tokens?.FirstOrDefault(token => token.Ticker?.ToUpper().Trim() == $"{name.ToUpper().Trim()}");
-            if (token is null) continue;
+            try
+            {
+                var chart = charts.FirstOrDefault(item => string.Equals(arg.Trim(), item.Ticker, StringComparison.OrdinalIgnoreCase));
 
-            msg += $"[烟花] {name.ToUpper().Trim(),-10} : {token?.Price?.FloorPrice:F8} KAS\n";
+                if (chart is null) continue;
+
+                var count = oks.FirstOrDefault(item => item.Item1 == arg.ToUpper()).Item2;
+                var mintPrice = 1.1 / count;
+
+                var price = chart?.PriceHistories?[^1]?.Price;
+
+                if (price is null) continue;
+
+                var ticker = chart?.Ticker?.ToUpper()?.Trim();
+
+                msg += mintPrice > 0.00000000000001
+                    ? $"[烟花] {ticker,-10} ({price / mintPrice:F2}) : {price:F8} KAS\n"
+                    : $"[烟花] {ticker,-10} : {price:F8} KAS\n";
+
+            }
+            catch (Exception e)
+            {
+                Serilog.Log.Error(e.Message);
+            }
         }
 
         await request.SendMessage(msg);
