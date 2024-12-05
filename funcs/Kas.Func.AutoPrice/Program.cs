@@ -1,5 +1,6 @@
 using Chuan.Core;
 using Chuan.Core.Models;
+using Kas.Func.AutoPrice.Controllers;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -11,21 +12,25 @@ Log.Logger = new LoggerConfiguration()
 var commands = new List<RegisterModel>()
 {
 #if DEBUG
-    new("price","http://100.77.255.127:5098/api/price")
+    //new("price","http://100.113.117.122:5098/api/price"),
+    new("auto","http://100.113.117.122:5098/api/auto")
 #else
-        new("price","http://122.152.227.199:5098/api/price")
+        new("price","http://122.152.227.199:5098/api/price"),
+        new("auto","http://122.152.227.199:5098/api/auto")
 #endif
 };
 
 commands.ForEach(command =>
 {
-    var response = ClientUtils.ClientInstance.PostAsJsonAsync("http://122.152.227.199:5099/api/callback/register", command.ToString()).Result;
+    var response = ClientUtils.ClientInstance.PostAsJsonAsync("http://100.86.231.69:5099/api/callback/register", command.ToString()).Result;
 
     if (response.IsSuccessStatusCode)
         Log.Logger.Information("Registing {name}", command.Name);
     else
         Log.Logger.Error("Registing {name}", command.Name);
 });
+
+AutoStatusManager.Run();
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();

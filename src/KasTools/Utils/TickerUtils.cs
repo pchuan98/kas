@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using Chuan.Core;
 using KasTools.Models;
+using KasTools.Models.Enhance;
 using Newtonsoft.Json;
 
 namespace KasTools.Utils;
@@ -18,7 +14,8 @@ public enum ChartInterval
     Y1
 }
 
-public static class TickerUtils
+[Obsolete("不再使用当前类")]
+public static partial class TickerUtils
 {
     public static async Task<KasInfo?> QueryChart(string ticker, ChartInterval interval = ChartInterval.D1)
     {

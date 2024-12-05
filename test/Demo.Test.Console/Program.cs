@@ -1,4 +1,6 @@
-﻿using KasTools.Utils;
+﻿using Demo.Test;
+using KasTools.Models.Enhance;
+using KasTools.Utils;
 using OpenCvSharp;
 using Serilog;
 
@@ -6,6 +8,14 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .WriteTo.Console()
     .CreateLogger();
+
+var tokens = (await TokenUtil.QueryAll())
+    //.Where(item => item.Status == "Minting")
+    .Select(item => $"{item.Ticker:10} {item.Status} {item.MintPersent * 100:F2}");
+
+Console.WriteLine(string.Join("\n", tokens));
+
+return;
 
 args = ["nacho", "kdao", "ghoad", "gdfi", "kasper", "konan", "burt",
     "koak", "koka", "mark", "kstr", "rakun", "somps", "phant", "fomoon",

@@ -1,11 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Chuan.Core;
 using KasTools;
 using KasTools.Models;
 using KasTools.Utils;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
 
 namespace Kas.Func.Mint;
 
@@ -178,7 +175,6 @@ public static class MintManager
 
         return result;
     }
-
 
     #region KasInfos
 

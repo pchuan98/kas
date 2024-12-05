@@ -20,7 +20,7 @@ public class MintController : ControllerBase
         return Ok("okk");
     }
 
-    private static string ?_mintString = null;
+    private static string? _mintString = null;
 
     private static DateTime _mintTime = DateTime.Now;
 
@@ -111,5 +111,4 @@ public static class WeChatApiUtils
     /// <returns></returns>
     public static async Task<string?> SendMessage(this CallbackModel model, string content)
         => await SendMessage(model.IsGroup ? model.Group : model.Sender, content);
-
 }

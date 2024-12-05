@@ -220,7 +220,6 @@ partial class KasInfo
     }
 }
 
-
 partial class KasInfo
 {
     /// <summary>

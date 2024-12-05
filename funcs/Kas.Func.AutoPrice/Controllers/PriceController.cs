@@ -1,6 +1,7 @@
 ﻿using Chuan.Core;
 using Chuan.Core.Models;
 using KasTools.Models;
+using KasTools.Models.Enhance;
 using KasTools.Utils;
 using Microsoft.AspNetCore.Mvc;
 using PChuan.Core;
@@ -105,10 +106,6 @@ public class PriceController : ControllerBase
 
         var msg = $"[TIME] {DateTime.Now:MM-dd HH:mm:ss}\n\n";
 
-        var charts = await TickerUtils.QueryCharts(args!);
-
-        //var marketInfo = await MarketUtils.Query();
-
         if (!System.IO.File.Exists("TokensIds"))
             await System.IO.File.WriteAllTextAsync("TokensIds", "");
 
@@ -131,28 +128,21 @@ public class PriceController : ControllerBase
                 await System.IO.File.AppendAllTextAsync("TokensIds", $"{item.Key.ToUpper()},{item.Value}\n");
         }
 
-        oks = (await System.IO.File.ReadAllLinesAsync("TokensIds"))
-            .SkipWhile(string.IsNullOrEmpty)
-            .Where(item => item.Contains(","))
-            .Select(item => (item.Split([','])[0], double.Parse(item.Split([','])[1])))
-            .ToHashSet();
+        //var charts = await TickerUtils.QueryCharts(args!);
+        var models = await TokenEnhanceUtils.QueryTokenModels(args!);
 
         foreach (var arg in args!)
         {
             try
             {
-                var chart = charts.FirstOrDefault(item => string.Equals(arg.Trim(), item.Ticker, StringComparison.OrdinalIgnoreCase));
+                var chart = models.FirstOrDefault(
+                    item => string.Equals(arg.Trim(), item?.Ticker, StringComparison.OrdinalIgnoreCase));
 
                 if (chart is null) continue;
 
-                var count = oks.FirstOrDefault(item => item.Item1 == arg.ToUpper()).Item2;
-                var mintPrice = 1.1 / count;
-
-                var price = chart?.PriceHistories?[^1]?.Price;
-
-                if (price is null) continue;
-
-                var ticker = chart?.Ticker?.ToUpper()?.Trim();
+                var ticker = chart.Ticker;
+                var price = chart.Price;
+                var mintPrice = chart.MintPrice;
 
                 msg += mintPrice > 0.00000000000001
                     ? $"[烟花] {ticker,-10} ({price / mintPrice:F2}) : {price:F8} KAS\n"
